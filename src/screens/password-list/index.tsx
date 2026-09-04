@@ -3,6 +3,7 @@ import { FlatList, RefreshControl, StatusBar, StyleSheet, View } from 'react-nat
 import { FAB } from 'react-native-paper';
 
 import { useTheme } from '../../hooks/use-theme.hook';
+import MaterialSymbols from '../../components/widgets/material-icon';
 import { EmptyState } from '../../components/widgets/empty-state';
 import type { IPasswordItem } from '../../global/types/common.type';
 import { usePasswordList } from './hooks/use-password-list.hook';
@@ -142,7 +143,9 @@ export default function PasswordListScreen({ navigation }: IProps): JSX.Element 
 
       <FAB
         style={[styles.fab, { backgroundColor: colors.accent }]}
-        icon="plus"
+        icon={({ size, color }) => (
+          <MaterialSymbols name="add" size={size} color={color} />
+        )}
         onPress={() => navigation.navigate('AddCredential')}
         color={colors.textOnAccent}
         disabled={loading}

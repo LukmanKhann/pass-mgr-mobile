@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../hooks/use-theme.hook';
 import { Button } from '../../components/controls/button';
-import { Icon } from '../../components/widgets/icon';
+import MaterialSymbols from '../../components/widgets/material-icon';
 import { Typography } from '../../components/widgets/typography';
 import NumericPasswordModal from '../../components/Biometric/components/numeric-password-modal.component';
 import { useAppSettings } from './hooks/use-app-settings.hook';
@@ -57,7 +57,7 @@ export default function SettingsScreen(): JSX.Element {
         />
 
         <View style={[styles.logout, { marginTop: spacing.xl }]}>
-          <Button title="Sign Out" onPress={appSettings.handleLogout} variant="danger" fullWidth icon={<Icon name="logout" size={20} color={colors.textInverse} />} />
+          <Button title="Sign Out" onPress={appSettings.handleLogout} variant="danger" fullWidth icon={<MaterialSymbols name="logout" size={20} color={colors.textInverse} />} />
         </View>
 
         <View style={[styles.version, { gap: spacing.xs, marginTop: spacing.xl }]}>

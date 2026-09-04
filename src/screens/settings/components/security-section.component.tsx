@@ -2,7 +2,7 @@ import React from 'react';
 import { Switch, TouchableOpacity } from 'react-native';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
-import { Icon } from '../../../components/widgets/icon';
+import MaterialSymbols from '../../../components/widgets/material-icon';
 import { SectionHeader } from './section-header.component';
 import { SettingItem } from './setting-item.component';
 
@@ -46,15 +46,15 @@ export function SecuritySection({ securitySettings, passwordSettings }: IProps):
     <>
       <SectionHeader title="Security" />
       <SettingItem
-        icon="shield-lock"
+        icon="shield_lock"
         title="Authentication Status"
         subtitle={`Current: ${getAuthenticationStatus()}`}
         rightComponent={
-          <Icon name="information-outline" size={20} color={colors.textTertiary} />
+          <MaterialSymbols name="info" size={20} color={colors.textTertiary} />
         }
       />
       <SettingItem
-        icon={biometryType === 'Face ID' ? 'face-recognition' : 'fingerprint'}
+        icon={biometryType === 'Face ID' ? 'person' : 'fingerprint'}
         title={`${biometryType} Authentication`}
         subtitle={
           !hasNumericPassword
@@ -73,7 +73,7 @@ export function SecuritySection({ securitySettings, passwordSettings }: IProps):
         }
       />
       <SettingItem
-        icon="numeric"
+        icon="lock"
         title="Numeric Password"
         subtitle={hasNumericPassword ? 'Use 4-digit password to unlock' : 'Set up numeric password'}
         onPress={handleSetNumericPassword}
@@ -81,13 +81,13 @@ export function SecuritySection({ securitySettings, passwordSettings }: IProps):
         rightComponent={
           hasNumericPassword ? (
             <TouchableOpacity onPress={handleRemoveNumericPassword} activeOpacity={0.7}>
-              <Icon name="close-circle" size={20} color={colors.error} />
+              <MaterialSymbols name="close" size={20} color={colors.error} />
             </TouchableOpacity>
           ) : undefined
         }
       />
       <SettingItem
-        icon="lock-clock"
+        icon="shield_lock"
         title="Auto-lock"
         subtitle="Automatically lock after inactivity"
         rightComponent={
@@ -99,7 +99,7 @@ export function SecuritySection({ securitySettings, passwordSettings }: IProps):
           />
         }
       />
-      <SettingItem icon="key-change" title="Change Master Password" subtitle="Update your master password" showArrow />
+      <SettingItem icon="edit" title="Change Master Password" subtitle="Update your master password" showArrow />
     </>
   );
 }

@@ -17,7 +17,7 @@ export function AppearanceSection({ isDark, toggleTheme }: IProps): JSX.Element 
     <>
       <SectionHeader title="Appearance" />
       <SettingItem
-        icon={isDark ? 'weather-night' : 'weather-sunny'}
+        icon={isDark ? 'dark_mode' : 'light_mode'}
         title="Dark Mode"
         subtitle={`Currently using ${isDark ? 'dark' : 'light'} theme`}
         rightComponent={

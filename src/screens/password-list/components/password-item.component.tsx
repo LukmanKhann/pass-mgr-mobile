@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
 import { Badge } from '../../../components/widgets/badge';
 import { Card } from '../../../components/widgets/card';
-import { Icon } from '../../../components/widgets/icon';
+import MaterialSymbols from '../../../components/widgets/material-icon';
 import { Typography } from '../../../components/widgets/typography';
 import type { IPasswordItemProps } from '../password-list.type';
 
@@ -83,36 +83,53 @@ export function PasswordItem({
       )}
 
       <View style={[styles.actions, { gap: spacing.sm, marginTop: spacing.md, borderTopColor: colors.border }]}>
-        <Icon
-          name={passwordVisible ? 'eye-off-outline' : 'eye-outline'}
-          size={20}
-          color={colors.accent}
+        <TouchableOpacity
+          style={styles.touchable}
           onPress={() => onTogglePasswordVisibility(item.id)}
-        />
-        <Icon
-          name="content-copy"
-          size={20}
-          color={item.username ? colors.textSecondary : colors.textTertiary}
+          activeOpacity={0.7}
+        >
+          <MaterialSymbols
+            name={passwordVisible ? 'visibility_off' : 'visibility'}
+            size={20}
+            color={colors.accent}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.touchable}
           onPress={() => item.username && copy(item.username, 'username')}
-        />
-        <Icon
-          name="vpn-key"
-          size={20}
-          color={item.password ? colors.textSecondary : colors.textTertiary}
+          activeOpacity={0.7}
+        >
+          <MaterialSymbols
+            name="account_circle"
+            size={20}
+            color={item.username ? colors.textSecondary : colors.textTertiary}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.touchable}
           onPress={() => item.password && copy(item.password, 'password')}
-        />
-        <Icon
-          name="pencil-outline"
-          size={20}
-          color={colors.textSecondary}
+          activeOpacity={0.7}
+        >
+          <MaterialSymbols
+            name="lock"
+            size={20}
+            color={item.password ? colors.textSecondary : colors.textTertiary}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.touchable}
           onPress={() => onEdit(item.id)}
-        />
-        <Icon
-          name="trash-can-outline"
-          size={20}
-          color={colors.error}
+          activeOpacity={0.7}
+        >
+          <MaterialSymbols name="edit" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.touchable}
           onPress={() => onDelete(item.id)}
-        />
+          activeOpacity={0.7}
+        >
+          <MaterialSymbols name="delete" size={20} color={colors.error} />
+        </TouchableOpacity>
       </View>
     </Card>
   );
@@ -146,5 +163,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     borderTopWidth: 1,
     paddingTop: 12,
+  },
+  touchable: {
+    padding: 4,
   },
 });

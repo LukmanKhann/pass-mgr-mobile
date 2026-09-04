@@ -13,7 +13,8 @@ import LoadingScreen from './src/screens/loading/loading-screen.component';
 
 function AppContent(): JSX.Element {
   const { user, loading } = useContext(AuthContext);
-  const [isBiometricAuthenticated, setIsBiometricAuthenticated] = useState(false);
+  const [isBiometricAuthenticated, setIsBiometricAuthenticated] =
+    useState(false);
   const [needsBiometricAuth, setNeedsBiometricAuth] = useState(false);
   const [checkingBiometric, setCheckingBiometric] = useState(true);
   const [minimumLoading, setMinimumLoading] = useState(true);
@@ -39,7 +40,10 @@ function AppContent(): JSX.Element {
       }
       lastState = nextAppState;
     };
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
     return () => subscription.remove();
   }, []);
 
@@ -48,8 +52,10 @@ function AppContent(): JSX.Element {
       setCheckingBiometric(true);
 
       if (user) {
-        const biometricEnabled = await BiometricAuthService.isBiometricEnabled();
-        const hasNumericPassword = await BiometricAuthService.hasNumericPassword();
+        const biometricEnabled =
+          await BiometricAuthService.isBiometricEnabled();
+        const hasNumericPassword =
+          await BiometricAuthService.hasNumericPassword();
 
         if (biometricEnabled || hasNumericPassword) {
           setNeedsBiometricAuth(true);

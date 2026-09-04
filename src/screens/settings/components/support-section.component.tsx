@@ -12,9 +12,9 @@ export function SupportSection({ handleHelpSupport, handleAbout, handleRateApp }
   return (
     <>
       <SectionHeader title="Support" />
-      <SettingItem icon="help-circle-outline" title="Help & Support" subtitle="Get help and contact support" showArrow onPress={handleHelpSupport} />
-      <SettingItem icon="information-outline" title="About" subtitle="App version and information" showArrow onPress={handleAbout} />
-      <SettingItem icon="star-outline" title="Rate App" subtitle="Help us improve by rating the app" showArrow onPress={handleRateApp} />
+      <SettingItem icon="help" title="Help & Support" subtitle="Get help and contact support" showArrow onPress={handleHelpSupport} />
+      <SettingItem icon="info" title="About" subtitle="App version and information" showArrow onPress={handleAbout} />
+      <SettingItem icon="star" title="Rate App" subtitle="Help us improve by rating the app" showArrow onPress={handleRateApp} />
     </>
   );
 }

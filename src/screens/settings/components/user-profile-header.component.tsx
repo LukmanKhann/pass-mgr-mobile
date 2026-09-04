@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
-import { Icon } from '../../../components/widgets/icon';
+import MaterialSymbols from '../../../components/widgets/material-icon';
 import { Typography } from '../../../components/widgets/typography';
 import { AuthContext } from '../../../Auth/AuthContext';
 
@@ -13,7 +13,7 @@ export function UserProfileHeader(): JSX.Element {
   return (
     <View style={[styles.container, { gap: spacing.sm, borderBottomColor: colors.border }]}>
       <View style={[styles.avatar, { backgroundColor: colors.surfaceElevated, borderRadius: borderRadius.full }]}>
-        <Icon name="account" size={40} color={colors.accent} />
+        <MaterialSymbols name="account_circle" size={40} color={colors.accent} />
       </View>
       <Typography variant="headingMd" color={colors.textPrimary}>
         {user?.displayName || 'User'}

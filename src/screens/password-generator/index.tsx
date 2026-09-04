@@ -5,7 +5,6 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 import { useTheme } from '../../hooks/use-theme.hook';
 import { Button } from '../../components/controls/button';
-import { Icon } from '../../components/widgets/icon';
 import { Typography } from '../../components/widgets/typography';
 import MaterialSymbols from '../../components/widgets/material-icon';
 import { CustomSnackbar } from '../../global/utils/snackbar.util';
@@ -35,7 +34,7 @@ function OptionRow({ label, icon, value, onToggle }: IOptionRowProps): JSX.Eleme
       ]}
     >
       <View style={[styles.optionLabel, { gap: spacing.sm }]}>
-        <Icon name={icon} size={20} color={colors.textSecondary} />
+        <MaterialSymbols name={icon} size={20} color={colors.textSecondary} />
         <Typography variant="bodyMd" color={colors.textPrimary}>
           {label}
         </Typography>
@@ -129,10 +128,10 @@ export default function PasswordGenerator(): JSX.Element {
       </View>
 
       <View style={[styles.options, { gap: spacing.md }]}>
-        <OptionRow label="Lowercase" icon="format-letter-case" value={lowerCase} onToggle={() => setLowerCase(prev => !prev)} />
-        <OptionRow label="Uppercase" icon="format-letter-case" value={upperCase} onToggle={() => setUpperCase(prev => !prev)} />
-        <OptionRow label="Numbers" icon="numeric" value={numbers} onToggle={() => setNumbers(prev => !prev)} />
-        <OptionRow label="Special Characters" icon="code-tags" value={symbols} onToggle={() => setSymbols(prev => !prev)} />
+        <OptionRow label="Lowercase" icon="format_list_bulleted" value={lowerCase} onToggle={() => setLowerCase(prev => !prev)} />
+        <OptionRow label="Uppercase" icon="format_list_bulleted" value={upperCase} onToggle={() => setUpperCase(prev => !prev)} />
+        <OptionRow label="Numbers" icon="keyboard_arrow_up" value={numbers} onToggle={() => setNumbers(prev => !prev)} />
+        <OptionRow label="Special Characters" icon="warning" value={symbols} onToggle={() => setSymbols(prev => !prev)} />
       </View>
 
       {isPasswordGenerated ? (
@@ -162,7 +161,7 @@ export default function PasswordGenerator(): JSX.Element {
           </Typography>
           <View style={[styles.passwordActions, { gap: spacing.md }]}>
             <Button title="Generate" onPress={handleGenerate} variant="primary" style={styles.actionButton} />
-            <Button title="Copy" onPress={handleCopy} variant="outline" icon={<Icon name="content-copy" size={18} color={colors.textPrimary} />} style={styles.actionButton} />
+            <Button title="Copy" onPress={handleCopy} variant="outline" icon={<MaterialSymbols name="assignment" size={18} color={colors.textPrimary} />} style={styles.actionButton} />
           </View>
         </View>
       ) : (

@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
 import { Button } from '../../controls/button';
-import { Icon } from '../icon';
+import MaterialSymbols from '../material-icon';
 import { Typography } from '../typography';
 
 interface IProps {
@@ -34,7 +34,7 @@ export function EmptyState({
           },
         ]}
       >
-        <Icon name={icon} size={48} color={colors.accent} />
+        <MaterialSymbols name={icon} size={48} color={colors.accent} />
       </View>
       {title ? (
         <Typography

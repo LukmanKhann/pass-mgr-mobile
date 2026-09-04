@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
-import { Icon } from '../../../components/widgets/icon';
 import { Typography } from '../../../components/widgets/typography';
 import MaterialSymbols from '../../../components/widgets/material-icon';
 
@@ -45,7 +44,7 @@ export function SettingItem({
     >
       <View style={[styles.left, { gap: spacing.md }]}>
         <View style={[styles.iconWrap, { backgroundColor: colors.surfaceElevated, borderRadius: borderRadius.md }]}>
-          <Icon name={icon} size={22} color={disabled ? colors.textTertiary : colors.accent} />
+          <MaterialSymbols name={icon} size={22} color={disabled ? colors.textTertiary : colors.accent} />
         </View>
         <View style={styles.textBlock}>
           <Typography variant="bodyMd" color={disabled ? colors.textTertiary : colors.textPrimary} fontWeight="600">
