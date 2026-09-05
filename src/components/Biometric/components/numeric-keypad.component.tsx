@@ -22,7 +22,7 @@ export function NumericKeypad({
   maxLength,
   inputRef,
 }: INumericKeypadProps): JSX.Element {
-  const { colors, spacing, borderRadius } = useTheme();
+  const { colors, isDark, spacing, borderRadius } = useTheme();
 
   return (
     <View style={styles.inputRow}>
@@ -41,6 +41,7 @@ export function NumericKeypad({
         onChangeText={onChangeText}
         onSubmitEditing={onSubmit}
         keyboardType="numeric"
+        keyboardAppearance={isDark ? 'dark' : 'light'}
         secureTextEntry
         maxLength={maxLength}
         autoFocus={false}

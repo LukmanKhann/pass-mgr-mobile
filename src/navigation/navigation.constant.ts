@@ -1,8 +1,19 @@
 export const SCREENS = {
+  // Auth
   LOGIN: 'Login',
   SIGN_UP: 'SignUp',
-  VAULT_TAB: 'Vault',
-  ADD_CREDENTIAL_TAB: 'AddCredential',
-  GENERATOR_TAB: 'Generator',
-  SETTINGS_TAB: 'Settings',
+  // Bottom tabs
+  VAULT_TAB: 'VaultTab',
+  ADD_CREDENTIAL_TAB: 'AddCredentialTab',
+  GENERATOR_TAB: 'GeneratorTab',
+  SETTINGS_TAB: 'SettingsTab',
+  // Vault stack screens
+  VAULT: 'Vault',
+  EDIT_PASSWORD: 'EditPassword',
+  // Generator stack screens
+  GENERATOR: 'Generator',
+  // Settings stack screens
+  SETTINGS: 'Settings',
 } as const;
+
+export type IScreenName = (typeof SCREENS)[keyof typeof SCREENS];

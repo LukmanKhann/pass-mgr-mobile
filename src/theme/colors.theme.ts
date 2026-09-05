@@ -63,33 +63,36 @@ export const lightColors: IColorTokens = {
 };
 
 export const darkColors: IColorTokens = {
-  primary: '#F5E6D8',
-  primaryLight: '#E8D5C4',
+  // Ember Espresso — a warm, premium dark theme for a security-first vault.
+  // Action vs. accent get distinct roles: amber-primary for CTAs, caramel-gold
+  // accent for highlights. Warm neutrals give depth without going muddy.
+  primary: '#E3A857', // molten amber — primary actions
+  primaryLight: '#F2C98B',
   secondary: '#C8956C',
-  accent: '#C8956C',
-  accentLight: '#A07050',
-   background: '#0F0906',
-   surface: '#1A1108',
-   surfaceElevated: '#251A10',
-   border: '#3D2415',
-   borderLight: '#2A1A0D',
-   divider: '#2A1A0D',
-   textPrimary: '#F5E6D8',
-   textSecondary: '#B8956B',
-   textTertiary: '#7A5C42',
-   textInverse: '#1C0F08',
-   textOnPrimary: '#1C0F08',
-   textOnAccent: '#1C0F08',
-   success: '#66BB6A',
-   successLight: '#1A3A1C',
-   error: '#EF6C50',
-   errorLight: '#3A1A12',
-   warning: '#FFA726',
-   warningLight: '#3A2A12',
-   info: '#7BAFD4',
-   infoLight: '#1A2A3A',
-   skeleton: '#2A1A0D',
-   skeletonHighlight: '#3D2415',
-   overlay: 'rgba(0, 0, 0, 0.65)',
-   shadow: 'rgba(0, 0, 0, 0.4)',
+  accent: '#E0A96A', // luminous caramel-gold — icons, links, active states
+  accentLight: '#F5D9A4', // pale gold — switched-on track, soft fills
+  background: '#0C0A08', // deep espresso-black
+  surface: '#151210', // lifted one step
+  surfaceElevated: '#1F1A17', // modals, chips, icon wells
+  border: '#322A25', // visible hairline
+  borderLight: '#251F1C',
+  divider: '#231E1A',
+  textPrimary: '#F7EFE5', // warm ivory
+  textSecondary: '#CBB59B', // sand — strong contrast
+  textTertiary: '#9C846F', // muted but readable
+  textInverse: '#150F0A', // dark ink for vivid fills
+  textOnPrimary: '#1E1307',
+  textOnAccent: '#231505',
+  success: '#7FD394',
+  successLight: '#173222',
+  error: '#F48A6E',
+  errorLight: '#47221A',
+  warning: '#F0AE4E',
+  warningLight: '#3D2D15',
+  info: '#93C2E6',
+  infoLight: '#1B2B3D',
+  skeleton: '#262019',
+  skeletonHighlight: '#362E28',
+  overlay: 'rgba(5, 4, 3, 0.72)',
+  shadow: 'rgba(0, 0, 0, 0.6)',
 };

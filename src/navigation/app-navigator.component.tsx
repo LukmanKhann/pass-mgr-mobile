@@ -1,94 +1,47 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  DarkTheme as NavigationDarkTheme,
+  DefaultTheme as NavigationDefaultTheme,
+  NavigationContainer,
+  type Theme as NavigationTheme,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { useTheme } from '../hooks/use-theme.hook';
-import MaterialSymbols from '../components/widgets/material-icon';
+import type { IColorTokens } from '../theme/colors.theme';
 import { AuthContext } from '../Auth/AuthContext';
 import LoadingScreen from '../screens/loading/loading-screen.component';
 import LoginScreen from '../screens/login/login-screen.component';
 import SignUpScreen from '../screens/sign-up/sign-up-screen.component';
-import PasswordListScreen from '../screens/password-list';
-import AddPasswordScreen from '../screens/add-password/add-password-screen.component';
-import PasswordGenerator from '../screens/password-generator';
-import SettingsScreen from '../screens/settings';
+import { BottomTabNavigator } from './tabs/bottom-tab-navigator.component';
 import { SCREENS } from './navigation.constant';
-import type { IAuthStackParamList, IMainTabParamList } from './navigation.type';
+import { createAuthScreenOptions } from './shared/navigation.util';
+import type { IAuthStackParamList } from './navigation.type';
 
-const Stack = createNativeStackNavigator<IAuthStackParamList>();
-const Tab = createBottomTabNavigator<IMainTabParamList>();
+const AuthStack = createNativeStackNavigator<IAuthStackParamList>();
 
 const PERSISTENCE_KEY = 'NAVIGATION_STATE_V1';
 
-function TabNavigator(): JSX.Element {
-  const { colors } = useTheme();
-
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: colors.surface },
-        headerTintColor: colors.textPrimary,
-        headerTitleAlign: 'center',
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-        },
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.textTertiary,
-      }}
-    >
-      <Tab.Screen
-        name={SCREENS.VAULT_TAB}
-        component={PasswordListScreen}
-        options={{
-          title: 'Vault',
-          tabBarLabel: 'Vault',
-          tabBarIcon: ({ color }: { color: string }) => (
-            <MaterialSymbols name="shield_lock" variant="filled" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name={SCREENS.ADD_CREDENTIAL_TAB}
-        component={AddPasswordScreen}
-        options={{
-          title: 'Credentials',
-          tabBarLabel: 'Add',
-          tabBarIcon: ({ color }: { color: string }) => (
-            <MaterialSymbols name="add" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name={SCREENS.GENERATOR_TAB}
-        component={PasswordGenerator}
-        options={{
-          title: 'Generator',
-          tabBarLabel: 'Generator',
-          tabBarIcon: ({ color }: { color: string }) => (
-            <MaterialSymbols name="verified_user" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name={SCREENS.SETTINGS_TAB}
-        component={SettingsScreen}
-        options={{
-          title: 'Settings',
-          tabBarLabel: 'Settings',
-          tabBarIcon: ({ color }: { color: string }) => (
-            <MaterialSymbols name="settings" size={24} color={color} />
-          ),
-        }}
-      />
-    </Tab.Navigator>
-  );
+function getNavigationTheme(isDark: boolean, colors: IColorTokens): NavigationTheme {
+  const base = isDark ? NavigationDarkTheme : NavigationDefaultTheme;
+  return {
+    ...base,
+    colors: {
+      ...base.colors,
+      primary: colors.accent,
+      background: colors.background,
+      card: colors.surface,
+      text: colors.textPrimary,
+      border: colors.border,
+      notification: colors.error,
+    },
+  };
 }
 
 function AppNavigatorInner(): JSX.Element {
   const { user } = useContext(AuthContext);
+  const { colors, isDark } = useTheme();
   const navigationRef = useRef(null);
   const [navState, setNavState] = useState<unknown>(undefined);
 
@@ -97,8 +50,10 @@ function AppNavigatorInner(): JSX.Element {
       try {
         const savedStateString = await AsyncStorage.getItem(PERSISTENCE_KEY);
         const state = savedStateString ? JSON.parse(savedStateString) : undefined;
-        if (state) setNavState(state);
-      } catch (error) {
+        if (state) {
+          setNavState(state);
+        }
+      } catch {
         // ignore restore errors
       }
     };
@@ -109,25 +64,28 @@ function AppNavigatorInner(): JSX.Element {
     <NavigationContainer
       ref={navigationRef}
       initialState={navState as never}
+      theme={getNavigationTheme(isDark, colors)}
       onStateChange={(state: unknown) =>
         AsyncStorage.setItem(PERSISTENCE_KEY, JSON.stringify(state))
       }
     >
       {user ? (
-        <TabNavigator />
+        // ── Authenticated: native tab bar + per-tab stacks ──────────────────
+        <BottomTabNavigator />
       ) : (
-        <Stack.Navigator>
-          <Stack.Screen
-            name={SCREENS.LOGIN}
+        // ── Unauthenticated: auth-only stack ────────────────────────────────
+        <AuthStack.Navigator screenOptions={createAuthScreenOptions(colors)}>
+          <AuthStack.Screen
+            name={SCREENS.LOGIN as 'Login'}
             component={LoginScreen}
             options={{ headerShown: false }}
           />
-          <Stack.Screen
-            name={SCREENS.SIGN_UP}
+          <AuthStack.Screen
+            name={SCREENS.SIGN_UP as 'SignUp'}
             component={SignUpScreen}
             options={{ headerShown: false }}
           />
-        </Stack.Navigator>
+        </AuthStack.Navigator>
       )}
     </NavigationContainer>
   );

@@ -15,7 +15,7 @@ export function Input({
   style,
   ...props
 }: IInputProps) {
-  const { colors, borderRadius: br, spacing: sp } = useTheme();
+  const { colors, isDark, borderRadius: br, spacing: sp } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
   return (
@@ -43,6 +43,7 @@ export function Input({
             { color: colors.textPrimary },
             style,
           ]}
+          keyboardAppearance={isDark ? 'dark' : 'light'}
           placeholderTextColor={colors.textTertiary}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}

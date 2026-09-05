@@ -17,3 +17,19 @@ export const CATEGORIES = [
   { label: 'Entertainment', value: 'entertainment' },
   { label: 'Others', value: 'others' },
 ];
+
+/**
+ * Identity dot colors per category. Chosen as mid-tone hues that keep enough
+ * contrast against both the light and the dark surface so the category chips
+ * stay legible in either theme.
+ */
+export const CATEGORY_DOT_COLORS: Record<string, string> = {
+  social: '#7C9CF5',
+  work: '#E8B46A',
+  finance: '#63D29A',
+  games: '#B394F2',
+  personal: '#F58FAB',
+  shopping: '#5ECFE0',
+  entertainment: '#C780E8',
+  others: '#9CA3AF',
+};

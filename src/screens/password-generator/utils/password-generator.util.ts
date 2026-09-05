@@ -48,3 +48,14 @@ export function calculatePasswordStrength(password: string): string {
   if (score < 5) return 'Medium';
   return 'Strong';
 }
+
+/**
+ * Maps a `calculatePasswordStrength` label to a 0–3 meter level for the
+ * shared StrengthMeter widget.
+ */
+export function getPasswordStrengthLevel(strength: string): number {
+  if (strength === 'Weak') return 1;
+  if (strength === 'Medium') return 2;
+  if (strength === 'Strong') return 3;
+  return 0;
+}

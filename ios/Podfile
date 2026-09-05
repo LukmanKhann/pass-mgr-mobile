@@ -13,14 +13,26 @@ require Pod::Executable.execute_command('node', ['-p',
 $RNFirebaseDisableSPM = true
 
 platform :ios, min_ios_version_supported
-use_modular_headers!
 prepare_react_native_project!
 
-linkage = ENV['USE_FRAMEWORKS']
-if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
-  use_frameworks! :linkage => linkage.to_sym
-end
+# Build every pod as a static framework, which gives each pod its own embedded module
+# map. This is required for Firebase 12+, whose Swift pods (FirebaseAuth,
+# FirebaseCoreInternal, FirebaseDatabase, FirebaseFirestore) must `import` their
+# Objective-C dependencies:
+#   - As plain static libraries those deps lack module maps:
+#       "[!] The Swift pod `X` depends upon `Y`, which does not define modules."
+#   - `use_modular_headers!` instead generates a broken module map for gRPC-Core
+#     (gRPC-Core/gRPC-C++ share the `grpc` header dir, so CocoaPods never materializes
+#     Pods/Headers/Private/grpc/gRPC-Core.modulemap):
+#       "module map file '.../gRPC-Core.modulemap' not found"
+#   Static frameworks avoid both problems. See rnfirebase.io/ios-spm and
+#   github.com/invertase/react-native-firebase/issues/7805.
+$RNFirebaseAsStaticFramework = true
+
+# Default to static linkage (matches RN's USE_FRAMEWORKS knob while keeping the
+# community-standard static-framework setup for Firebase).
+linkage = ENV['USE_FRAMEWORKS'] || 'static'
+use_frameworks! :linkage => linkage.to_sym
 
 target 'passMgrMobile' do
   config = use_native_modules!

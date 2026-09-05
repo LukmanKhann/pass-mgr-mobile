@@ -1,53 +1,101 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 import Slider from '@react-native-community/slider';
 import Clipboard from '@react-native-clipboard/clipboard';
+import BouncyCheckbox from 'react-native-bouncy-checkbox';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import MaterialSymbols from '../../components/widgets/material-icon';
 
 import { useTheme } from '../../hooks/use-theme.hook';
 import { Button } from '../../components/controls/button';
 import { Typography } from '../../components/widgets/typography';
-import MaterialSymbols from '../../components/widgets/material-icon';
 import { CustomSnackbar } from '../../global/utils/snackbar.util';
-import { calculatePasswordStrength, generatePassword } from './utils/password-generator.util';
+import {
+  calculatePasswordStrength,
+  generatePassword,
+  getPasswordStrengthLevel,
+} from './utils/password-generator.util';
+import { StrengthMeter } from '../../components/widgets/strength-meter';
 
 interface IOptionRowProps {
   label: string;
   icon: string;
   value: boolean;
-  onToggle: () => void;
+  onToggle: (value: boolean) => void;
 }
 
-function OptionRow({ label, icon, value, onToggle }: IOptionRowProps): JSX.Element {
-  const { colors, spacing, borderRadius } = useTheme();
+function OptionRow({
+  label,
+  icon,
+  value,
+  onToggle,
+}: IOptionRowProps): JSX.Element {
+  const { colors, isDark, spacing, borderRadius } = useTheme();
   return (
     <TouchableOpacity
-      onPress={onToggle}
       activeOpacity={0.7}
+      onPress={() => onToggle(!value)}
       style={[
         styles.optionRow,
         {
           backgroundColor: colors.surface,
-          borderColor: colors.border,
+          borderColor: isDark ? colors.borderLight : colors.border,
           borderRadius: borderRadius.lg,
           padding: spacing.md,
+          gap: spacing.md,
         },
       ]}
     >
-      <View style={[styles.optionLabel, { gap: spacing.sm }]}>
-        <MaterialSymbols name={icon} size={20} color={colors.textSecondary} />
-        <Typography variant="bodyMd" color={colors.textPrimary}>
-          {label}
-        </Typography>
+      <View
+        style={[
+          styles.iconWell,
+          {
+            backgroundColor: colors.surfaceElevated,
+            borderRadius: borderRadius.md,
+          },
+        ]}
+      >
+        <MaterialSymbols
+          name={icon}
+          size={20}
+          color={value ? colors.accent : colors.textTertiary}
+        />
       </View>
-      <View style={[styles.checkbox, { borderColor: value ? colors.accent : colors.border, backgroundColor: value ? colors.accent : 'transparent', borderRadius: borderRadius.sm }]}>
-        {value ? <MaterialSymbols name="check" size={14} color={colors.textOnAccent} /> : null}
-      </View>
+      <Typography
+        variant="bodyMd"
+        color={colors.textPrimary}
+        style={styles.optionLabel}
+      >
+        {label}
+      </Typography>
+      <BouncyCheckbox
+        disableText
+        isChecked={value}
+        size={24}
+        fillColor={colors.accent}
+        unFillColor={colors.surface}
+        iconStyle={{
+          borderRadius: 6,
+          borderWidth: 1.5,
+          borderColor: value ? colors.accent : colors.border,
+        }}
+        innerIconStyle={{ borderRadius: 6 }}
+        iconComponent={<MaterialSymbols name="check" size={16} color={colors.textOnAccent} />}
+        onPress={onToggle}
+      />
     </TouchableOpacity>
   );
 }
 
 export default function PasswordGenerator(): JSX.Element {
-  const { colors, spacing, borderRadius } = useTheme();
+  const { colors, isDark, spacing, borderRadius } = useTheme();
   const [password, setPassword] = useState('');
   const [isPasswordGenerated, setIsPasswordGenerated] = useState(false);
   const [lowerCase, setLowerCase] = useState(true);
@@ -57,13 +105,37 @@ export default function PasswordGenerator(): JSX.Element {
   const [passwordStrength, setPasswordStrength] = useState('');
   const [sliderValue, setSliderValue] = useState(8);
 
+  const elevatedCard: ViewStyle = {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 3,
+    ...(isDark ? { borderWidth: 1, borderColor: colors.borderLight } : null),
+  };
+
+  const strengthLevel = getPasswordStrengthLevel(passwordStrength);
+  const strengthColors: Record<string, string> = {
+    Weak: colors.error,
+    Medium: colors.warning,
+    Strong: colors.success,
+  };
+  const strengthColor = strengthColors[passwordStrength] ?? colors.success;
+
   const handleGenerate = (): void => {
     try {
-      const result = generatePassword(sliderValue, { lowerCase, upperCase, numbers, symbols });
+      const result = generatePassword(sliderValue, {
+        lowerCase,
+        upperCase,
+        numbers,
+        symbols,
+      });
       setPassword(result);
       setIsPasswordGenerated(true);
       setPasswordStrength(calculatePasswordStrength(result));
-    } catch (error) {
+    } catch {
       CustomSnackbar.error('Please select at least one character type');
     }
   };
@@ -84,113 +156,212 @@ export default function PasswordGenerator(): JSX.Element {
     setSliderValue(8);
   };
 
-  const strengthColor =
-    passwordStrength === 'Weak'
-      ? colors.error
-      : passwordStrength === 'Medium'
-      ? colors.warning
-      : colors.success;
-
   return (
-    <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={styles.scrollContent}>
-      <View style={[styles.header, { gap: spacing.xs }]}>
-        <Typography variant="headingLg" color={colors.textPrimary}>
-          Password Generator
-        </Typography>
-        <Typography variant="bodyMd" color={colors.textSecondary}>
-          Create secure passwords instantly
-        </Typography>
-      </View>
+    <ScrollView
+      style={[styles.screen, { backgroundColor: colors.background }]}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: borderRadius.lg, padding: spacing.lg }]}>
-        <View style={[styles.sliderHeader, { gap: spacing.sm }]}>
+      <View
+        style={[
+          styles.card,
+          elevatedCard,
+          { marginHorizontal: spacing.lg, padding: spacing.lg },
+        ]}
+      >
+        <View style={styles.sliderHeader}>
           <Typography variant="label" color={colors.textSecondary}>
-            Password Length
+            Length
           </Typography>
-          <Typography variant="subtitleMd" color={colors.accent} fontWeight="700">
+          <Typography
+            variant="numberDisplay"
+            color={colors.accent}
+            fontWeight="700"
+          >
             {sliderValue}
           </Typography>
         </View>
         <Slider
-          minimumValue={4}
+          minimumValue={8}
           maximumValue={32}
           step={1}
           value={sliderValue}
-          onValueChange={(value: number) => setSliderValue(Math.round(value))}
+          onValueChange={(value: number) => setSliderValue(value)}
           minimumTrackTintColor={colors.accent}
           maximumTrackTintColor={colors.border}
           thumbTintColor={colors.accent}
         />
         <View style={styles.sliderRange}>
-          <Typography variant="caption" color={colors.textTertiary}>4</Typography>
-          <Typography variant="caption" color={colors.textTertiary}>32</Typography>
+          <Typography variant="caption" color={colors.textTertiary}>
+            8
+          </Typography>
+          <Typography variant="caption" color={colors.textTertiary}>
+            32
+          </Typography>
         </View>
       </View>
 
-      <View style={[styles.options, { gap: spacing.md }]}>
-        <OptionRow label="Lowercase" icon="format_list_bulleted" value={lowerCase} onToggle={() => setLowerCase(prev => !prev)} />
-        <OptionRow label="Uppercase" icon="format_list_bulleted" value={upperCase} onToggle={() => setUpperCase(prev => !prev)} />
-        <OptionRow label="Numbers" icon="keyboard_arrow_up" value={numbers} onToggle={() => setNumbers(prev => !prev)} />
-        <OptionRow label="Special Characters" icon="warning" value={symbols} onToggle={() => setSymbols(prev => !prev)} />
+      <View
+        style={[
+          styles.options,
+          { paddingHorizontal: spacing.lg, gap: spacing.sm },
+        ]}
+      >
+        <OptionRow
+          label="Lowercase letters"
+          icon="text_fields"
+          value={lowerCase}
+          onToggle={setLowerCase}
+        />
+        <OptionRow
+          label="Uppercase letters"
+          icon="keyboard_capslock"
+          value={upperCase}
+          onToggle={setUpperCase}
+        />
+        <OptionRow
+          label="Numbers"
+          icon="dialpad"
+          value={numbers}
+          onToggle={setNumbers}
+        />
+        <OptionRow
+          label="Special characters"
+          icon="asterisk"
+          value={symbols}
+          onToggle={setSymbols}
+        />
       </View>
 
       {isPasswordGenerated ? (
-        <View
+        <Animated.View
+          entering={FadeInDown.duration(250)}
           style={[
-            styles.passwordCard,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-              borderRadius: borderRadius.xl,
-              padding: spacing.lg,
-            },
+            styles.card,
+            elevatedCard,
+            { marginHorizontal: spacing.lg, padding: spacing.lg },
           ]}
         >
-          <View style={[styles.passwordHeader, { gap: spacing.sm }]}>
+          <View style={styles.passwordHeader}>
             <Typography variant="label" color={colors.textSecondary}>
               Generated Password
             </Typography>
-            <View style={[styles.strengthBadge, { backgroundColor: strengthColor, borderRadius: borderRadius.full }]}>
-              <Typography variant="caption" color={colors.textInverse} fontWeight="600">
+            <View
+              style={[
+                styles.strengthBadge,
+                {
+                  backgroundColor: strengthColor,
+                  borderRadius: borderRadius.full,
+                },
+              ]}
+            >
+              <Typography
+                variant="caption"
+                color={colors.textInverse}
+                fontWeight="600"
+              >
                 {passwordStrength}
               </Typography>
             </View>
           </View>
-          <Typography variant="tokenDisplay" color={colors.accent} align="center" selectable style={styles.passwordText}>
+          <StrengthMeter
+            level={strengthLevel}
+            color={strengthColor}
+            style={{ marginVertical: spacing.md }}
+          />
+          <Typography
+            variant="tokenDisplay"
+            color={colors.textPrimary}
+            align="center"
+            selectable
+            style={styles.passwordText}
+          >
             {password}
           </Typography>
           <View style={[styles.passwordActions, { gap: spacing.md }]}>
-            <Button title="Generate" onPress={handleGenerate} variant="primary" style={styles.actionButton} />
-            <Button title="Copy" onPress={handleCopy} variant="outline" icon={<MaterialSymbols name="assignment" size={18} color={colors.textPrimary} />} style={styles.actionButton} />
+            <Button
+              title="Copy"
+              onPress={handleCopy}
+              variant="outline"
+              icon={
+                <MaterialSymbols
+                  name="assignment"
+                  size={18}
+                  color={colors.primary}
+                />
+              }
+              style={styles.actionButton}
+            />
+            <Button
+              title="Regenerate"
+              onPress={handleGenerate}
+              variant="primary"
+              icon={
+                <MaterialSymbols
+                  name="refresh"
+                  size={18}
+                  color={colors.textOnPrimary}
+                />
+              }
+              style={styles.actionButton}
+            />
           </View>
-        </View>
+        </Animated.View>
       ) : (
-        <Button title="Generate Password" onPress={handleGenerate} variant="primary" fullWidth style={styles.generateButton} />
+        <View style={{ paddingHorizontal: spacing.lg }}>
+          <Button
+            title="Generate Password"
+            onPress={handleGenerate}
+            variant="primary"
+            fullWidth
+            icon={
+              <MaterialSymbols
+                name="bolt"
+                size={18}
+                color={colors.textOnPrimary}
+              />
+            }
+            style={styles.generateButton}
+          />
+        </View>
       )}
 
-      <Button title="Reset All" onPress={resetAll} variant="ghost" fullWidth style={styles.resetButton} />
+      <View style={{ paddingHorizontal: spacing.lg }}>
+        <Button
+          title="Reset All"
+          onPress={resetAll}
+          variant="ghost"
+          fullWidth
+          style={styles.resetButton}
+        />
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   scrollContent: {
-    padding: 16,
+    paddingTop: 16,
+    paddingBottom: 24,
   },
-  header: {
-    marginBottom: 16,
-  },
-  section: {
+  card: {
     marginBottom: 16,
   },
   sliderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
   },
   sliderRange: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 4,
   },
   options: {
     marginBottom: 16,
@@ -198,22 +369,16 @@ const styles = StyleSheet.create({
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     borderWidth: 1,
   },
-  optionLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  checkbox: {
-    width: 22,
-    height:  22,
+  iconWell: {
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
   },
-  passwordCard: {
-    marginBottom: 16,
+  optionLabel: {
+    flex: 1,
   },
   passwordHeader: {
     flexDirection: 'row',
@@ -231,12 +396,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   actionButton: {
-    flex:  1,
+    flex: 1,
   },
   generateButton: {
-    marginBottom:  8,
+    marginBottom: 8,
   },
   resetButton: {
-    marginBottom:  24,
+    marginBottom: 24,
   },
 });

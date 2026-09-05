@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AppState } from 'react-native';
-import { PaperProvider } from 'react-native-paper';
+import { MD3DarkTheme, MD3LightTheme, PaperProvider, type MD3Theme } from 'react-native-paper';
 
 import AppNavigator from './src/navigation/app-navigator.component';
 import { ThemeProvider } from './src/context/theme-context.component';
+import { useTheme } from './src/hooks/use-theme.hook';
+import type { IColorTokens } from './src/theme/colors.theme';
 import { AuthProvider, AuthContext } from './src/Auth/AuthContext';
 import { PasswordProvider } from './src/context/PasswordContext/password-context.component';
 import { SnackbarHost } from './src/global/utils/snackbar.util';
@@ -102,15 +104,51 @@ function AppContent(): JSX.Element {
   return <AppNavigator />;
 }
 
+function getPaperTheme(isDark: boolean, colors: IColorTokens): MD3Theme {
+  const base = isDark ? MD3DarkTheme : MD3LightTheme;
+  return {
+    ...base,
+    colors: {
+      ...base.colors,
+      primary: colors.accent,
+      background: colors.background,
+      surface: colors.surface,
+      surfaceVariant: colors.surfaceElevated,
+      surfaceDisabled: colors.surfaceElevated,
+      onSurface: colors.textPrimary,
+      onSurfaceVariant: colors.textSecondary,
+      outline: colors.border,
+      outlineVariant: colors.borderLight,
+      error: colors.error,
+      onError: colors.textInverse,
+      onPrimary: colors.textOnPrimary,
+      onSecondary: colors.textInverse,
+      elevation: {
+        level0: 'transparent',
+        level1: colors.surfaceElevated,
+        level2: colors.surfaceElevated,
+        level3: colors.surfaceElevated,
+        level4: colors.surface,
+        level5: colors.surface,
+      },
+    },
+  };
+}
+
+function ThemedPaperProvider({ children }: { children: React.ReactNode }): React.ReactElement {
+  const { colors, isDark } = useTheme();
+  return <PaperProvider theme={getPaperTheme(isDark, colors)}>{children}</PaperProvider>;
+}
+
 function App(): JSX.Element {
   return (
     <ThemeProvider>
       <AuthProvider>
         <PasswordProvider>
-          <PaperProvider>
+          <ThemedPaperProvider>
             <SnackbarHost />
             <AppContent />
-          </PaperProvider>
+          </ThemedPaperProvider>
         </PasswordProvider>
       </AuthProvider>
     </ThemeProvider>
