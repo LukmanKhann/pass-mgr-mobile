@@ -1,7 +1,8 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+    <!-- Using Material3.DynamicColors for Material You support (adapts to wallpaper colors) -->
+    <style name="AppTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
     </style>

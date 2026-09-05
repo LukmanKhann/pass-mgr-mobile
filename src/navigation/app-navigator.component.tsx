@@ -23,7 +23,10 @@ const AuthStack = createNativeStackNavigator<IAuthStackParamList>();
 
 const PERSISTENCE_KEY = 'NAVIGATION_STATE_V1';
 
-function getNavigationTheme(isDark: boolean, colors: IColorTokens): NavigationTheme {
+function getNavigationTheme(
+  isDark: boolean,
+  colors: IColorTokens,
+): NavigationTheme {
   const base = isDark ? NavigationDarkTheme : NavigationDefaultTheme;
   return {
     ...base,
@@ -49,7 +52,9 @@ function AppNavigatorInner(): JSX.Element {
     const restoreState = async (): Promise<void> => {
       try {
         const savedStateString = await AsyncStorage.getItem(PERSISTENCE_KEY);
-        const state = savedStateString ? JSON.parse(savedStateString) : undefined;
+        const state = savedStateString
+          ? JSON.parse(savedStateString)
+          : undefined;
         if (state) {
           setNavState(state);
         }
@@ -70,10 +75,8 @@ function AppNavigatorInner(): JSX.Element {
       }
     >
       {user ? (
-        // ── Authenticated: native tab bar + per-tab stacks ──────────────────
         <BottomTabNavigator />
       ) : (
-        // ── Unauthenticated: auth-only stack ────────────────────────────────
         <AuthStack.Navigator screenOptions={createAuthScreenOptions(colors)}>
           <AuthStack.Screen
             name={SCREENS.LOGIN as 'Login'}

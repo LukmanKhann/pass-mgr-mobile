@@ -1,48 +1,32 @@
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
-import React from 'react';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Platform } from 'react-native';
+import React from 'react';
 
 import { useTheme } from '../../hooks/use-theme.hook';
 import { SCREENS } from '../navigation.constant';
-import type { IMainTabParamList } from '../navigation.type';
 import { VaultStackNavigator } from './vault-stack-navigator.component';
 import { AddCredentialStackNavigator } from './add-credential-stack-navigator.component';
 import { GeneratorStackNavigator } from './generator-stack-navigator.component';
 import { SettingsStackNavigator } from './settings-stack-navigator.component';
 
+import type { IMainTabParamList } from '../navigation.type';
+
 const Tab = createNativeBottomTabNavigator<IMainTabParamList>();
 
-/**
- * SF Symbol names (iOS) and Android drawable URI names for each tab.
- * Android URIs map to Material Design icon names bundled with the
- * react-native-bottom-tabs native module.
- */
-const TAB_ICONS: Record<string, { sfSymbol: string; androidUri: string }> = {
-  [SCREENS.VAULT_TAB]: {
-    sfSymbol: 'lock.shield.fill',
-    androidUri: 'shield_lock',
-  },
-  [SCREENS.ADD_CREDENTIAL_TAB]: {
-    sfSymbol: 'plus.circle.fill',
-    androidUri: 'add_circle',
-  },
-  [SCREENS.GENERATOR_TAB]: {
-    sfSymbol: 'checkmark.shield.fill',
-    androidUri: 'verified_user',
-  },
-  [SCREENS.SETTINGS_TAB]: {
-    sfSymbol: 'gearshape.fill',
-    androidUri: 'settings',
-  },
-};
+const getIcon = (name: string) => Icon.getImageSourceSync(name);
 
 export function BottomTabNavigator(): JSX.Element {
   const { colors } = useTheme();
 
   return (
     <Tab.Navigator
-      screenOptions={{
-        tabBarActiveTintColor: colors.accent,
+      labeled={true}
+      disablePageAnimations={Platform.OS === 'ios' ? false : true}
+      tabBarActiveTintColor={colors.accent}
+      tabBarInactiveTintColor={colors.textSecondary}
+      tabBarStyle={{
+        backgroundColor: colors.surface,
       }}
     >
       <Tab.Screen
@@ -50,11 +34,7 @@ export function BottomTabNavigator(): JSX.Element {
         component={VaultStackNavigator}
         options={{
           tabBarLabel: 'Vault',
-          tabBarIcon: () =>
-            Platform.select({
-              ios: { sfSymbol: TAB_ICONS[SCREENS.VAULT_TAB].sfSymbol },
-              default: { uri: TAB_ICONS[SCREENS.VAULT_TAB].androidUri },
-            }),
+          tabBarIcon: () => getIcon('shield-lock'),
         }}
       />
       <Tab.Screen
@@ -62,11 +42,7 @@ export function BottomTabNavigator(): JSX.Element {
         component={AddCredentialStackNavigator}
         options={{
           tabBarLabel: 'Add',
-          tabBarIcon: () =>
-            Platform.select({
-              ios: { sfSymbol: TAB_ICONS[SCREENS.ADD_CREDENTIAL_TAB].sfSymbol },
-              default: { uri: TAB_ICONS[SCREENS.ADD_CREDENTIAL_TAB].androidUri },
-            }),
+          tabBarIcon: () => getIcon('plus-circle'),
         }}
       />
       <Tab.Screen
@@ -74,11 +50,7 @@ export function BottomTabNavigator(): JSX.Element {
         component={GeneratorStackNavigator}
         options={{
           tabBarLabel: 'Generator',
-          tabBarIcon: () =>
-            Platform.select({
-              ios: { sfSymbol: TAB_ICONS[SCREENS.GENERATOR_TAB].sfSymbol },
-              default: { uri: TAB_ICONS[SCREENS.GENERATOR_TAB].androidUri },
-            }),
+          tabBarIcon: () => getIcon('shield-check'),
         }}
       />
       <Tab.Screen
@@ -86,11 +58,7 @@ export function BottomTabNavigator(): JSX.Element {
         component={SettingsStackNavigator}
         options={{
           tabBarLabel: 'Settings',
-          tabBarIcon: () =>
-            Platform.select({
-              ios: { sfSymbol: TAB_ICONS[SCREENS.SETTINGS_TAB].sfSymbol },
-              default: { uri: TAB_ICONS[SCREENS.SETTINGS_TAB].androidUri },
-            }),
+          tabBarIcon: () => getIcon('cog'),
         }}
       />
     </Tab.Navigator>

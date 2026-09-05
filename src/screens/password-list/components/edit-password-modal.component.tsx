@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
 import { Button } from '../../../components/controls/button';
@@ -47,7 +54,13 @@ export function EditPasswordModal({
     setPassword(initialPassword);
     setCategory(initialCategory || 'others');
     setErrors({});
-  }, [visible, initialTitle, initialUsername, initialPassword, initialCategory]);
+  }, [
+    visible,
+    initialTitle,
+    initialUsername,
+    initialPassword,
+    initialCategory,
+  ]);
 
   const handleSave = async (): Promise<void> => {
     const nextErrors: Record<string, string> = {};
@@ -60,9 +73,20 @@ export function EditPasswordModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onDismiss}>
-      <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
-        <View
+    <Modal
+      visible={visible}
+      transparent
+      animationType={Platform.OS === 'ios' ? 'fade' : 'slide'}
+      onRequestClose={onDismiss}
+    >
+      <TouchableOpacity
+        activeOpacity={1}
+        style={[styles.overlay, { backgroundColor: colors.overlay }]}
+        onPress={onDismiss}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => {}}
           style={[
             styles.container,
             {
@@ -72,7 +96,12 @@ export function EditPasswordModal({
             },
           ]}
         >
-          <Typography variant="headingMd" color={colors.textPrimary} align="center" style={styles.title}>
+          <Typography
+            variant="headingMd"
+            color={colors.textPrimary}
+            align="center"
+            style={styles.title}
+          >
             Edit Credentials
           </Typography>
 
@@ -106,7 +135,9 @@ export function EditPasswordModal({
                   color={colors.textTertiary}
                 />
               }
-              onRightIconPress={() => onTogglePasswordVisibility(!passwordVisible)}
+              onRightIconPress={() =>
+                onTogglePasswordVisibility(!passwordVisible)
+              }
             />
 
             <View style={[styles.categoryWrap, { gap: spacing.xs }]}>
@@ -125,12 +156,18 @@ export function EditPasswordModal({
                         styles.categoryChip,
                         active
                           ? { backgroundColor: colors.accent }
-                          : { backgroundColor: colors.surfaceElevated, borderColor: colors.border, borderWidth: 1 },
+                          : {
+                              backgroundColor: colors.surfaceElevated,
+                              borderColor: colors.border,
+                              borderWidth: 1,
+                            },
                       ]}
                     >
                       <Typography
                         variant="caption"
-                        color={active ? colors.textOnAccent : colors.textSecondary}
+                        color={
+                          active ? colors.textOnAccent : colors.textSecondary
+                        }
                         fontWeight="600"
                       >
                         {cat.label}
@@ -141,19 +178,32 @@ export function EditPasswordModal({
               </View>
             </View>
 
-            <View style={[styles.buttonRow, { gap: spacing.md, marginTop: spacing.lg }]}>
-              <Button title="Cancel" onPress={onDismiss} variant="outline" style={styles.button} disabled={loading} />
+            <View
+              style={[
+                styles.buttonRow,
+                { gap: spacing.md, marginTop: spacing.lg },
+              ]}
+            >
+              <Button
+                title="Cancel"
+                onPress={onDismiss}
+                variant="outline"
+                size="sm"
+                style={styles.button}
+                disabled={loading}
+              />
               <Button
                 title={loading ? 'Saving...' : 'Save Changes'}
                 onPress={handleSave}
                 variant="primary"
+                size="sm"
                 style={styles.button}
                 loading={loading}
               />
             </View>
           </ScrollView>
-        </View>
-      </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 }
@@ -190,6 +240,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   button: {
-    flex:  1,
+    flex: 1,
   },
 });
