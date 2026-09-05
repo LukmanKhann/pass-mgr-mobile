@@ -2,8 +2,9 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { useTheme } from '../../hooks/use-theme.hook';
 import PasswordListScreen from '../../screens/password-list';
+
+import { useTheme } from '../../hooks/use-theme.hook';
 import { SCREENS } from '../navigation.constant';
 import { createDefaultScreenOptions } from '../shared/navigation.util';
 import type { IVaultStackParamList } from '../navigation.type';
@@ -20,7 +21,8 @@ export function VaultStackNavigator(): JSX.Element {
         component={PasswordListScreen}
         options={{
           title: 'Vault',
-          headerLargeTitle: true,
+          headerLargeTitle: false,
+          headerTitleAlign: 'center',
           headerLargeTitleShadowVisible: false,
           // ── Native search bar (replaces the custom JS TextInput SearchBar) ──
           headerSearchBarOptions: {

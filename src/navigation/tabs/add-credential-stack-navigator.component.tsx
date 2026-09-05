@@ -1,8 +1,9 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { useTheme } from '../../hooks/use-theme.hook';
 import AddPasswordScreen from '../../screens/add-password/add-password-screen.component';
+
+import { useTheme } from '../../hooks/use-theme.hook';
 import { createDefaultScreenOptions } from '../shared/navigation.util';
 
 type IAddCredentialStackParamList = {
@@ -21,7 +22,8 @@ export function AddCredentialStackNavigator(): JSX.Element {
         component={AddPasswordScreen}
         options={{
           title: 'Add Credential',
-          headerLargeTitle: true,
+          headerLargeTitle: false,
+          headerTitleAlign: 'center',
           headerLargeTitleShadowVisible: false,
           headerStyle: { backgroundColor: colors.background },
         }}

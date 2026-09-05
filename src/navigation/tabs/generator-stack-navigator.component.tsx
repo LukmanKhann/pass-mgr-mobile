@@ -1,8 +1,9 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { useTheme } from '../../hooks/use-theme.hook';
 import PasswordGenerator from '../../screens/password-generator';
+
+import { useTheme } from '../../hooks/use-theme.hook';
 import { SCREENS } from '../navigation.constant';
 import { createDefaultScreenOptions } from '../shared/navigation.util';
 import type { IGeneratorStackParamList } from '../navigation.type';
@@ -19,7 +20,8 @@ export function GeneratorStackNavigator(): JSX.Element {
         component={PasswordGenerator}
         options={{
           title: 'Generator',
-          headerLargeTitle: true,
+          headerLargeTitle: false,
+          headerTitleAlign: 'center',
           headerLargeTitleShadowVisible: false,
           headerStyle: { backgroundColor: colors.background },
         }}

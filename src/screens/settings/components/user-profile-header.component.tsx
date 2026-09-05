@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { useTheme } from '../../../hooks/use-theme.hook';
 import MaterialSymbols from '../../../components/widgets/material-icon';
+
+import { useTheme } from '../../../hooks/use-theme.hook';
 import { Typography } from '../../../components/widgets/typography';
 import { AuthContext } from '../../../Auth/AuthContext';
 
@@ -11,9 +12,26 @@ export function UserProfileHeader(): JSX.Element {
   const { user } = useContext(AuthContext);
 
   return (
-    <View style={[styles.container, { gap: spacing.sm, borderBottomColor: colors.border }]}>
-      <View style={[styles.avatar, { backgroundColor: colors.surfaceElevated, borderRadius: borderRadius.full }]}>
-        <MaterialSymbols name="account_circle" size={40} color={colors.accent} />
+    <View
+      style={[
+        styles.container,
+        { gap: spacing.sm, borderBottomColor: colors.border },
+      ]}
+    >
+      <View
+        style={[
+          styles.avatar,
+          {
+            backgroundColor: colors.surfaceElevated,
+            borderRadius: borderRadius.full,
+          },
+        ]}
+      >
+        <MaterialSymbols
+          name="account_circle"
+          size={40}
+          color={colors.accent}
+        />
       </View>
       <Typography variant="headingMd" color={colors.textPrimary}>
         {user?.displayName || 'User'}
@@ -28,7 +46,7 @@ export function UserProfileHeader(): JSX.Element {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingBottom: 20,
     borderBottomWidth: 1,
   },
   avatar: {
