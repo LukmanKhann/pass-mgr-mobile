@@ -25,6 +25,9 @@
       ],
       "@global/*": [
         "./src/global/*"
+      ],
+      "@motion/*": [
+        "./src/motion/*"
       ]
     },
     "resolveJsonModule": true

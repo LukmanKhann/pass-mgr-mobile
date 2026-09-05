@@ -11,8 +11,12 @@ module.exports = {
         '@theme': './src/theme',
         '@navigation': './src/navigation',
         '@context': './src/context',
-        '@global': './src/global'
+        '@global': './src/global',
+        '@motion': './src/motion'
       }
-    }]
+    }],
+    // React Native Reanimated 4 requires the Worklets Babel plugin.
+    // IMPORTANT: it must be listed LAST.
+    'react-native-worklets/plugin'
   ]
 };

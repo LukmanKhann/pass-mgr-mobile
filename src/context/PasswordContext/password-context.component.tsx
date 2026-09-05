@@ -1,24 +1,16 @@
 import React, {createContext, useEffect, useState, useContext} from 'react';
-import * as databaseModule from '@react-native-firebase/database';
+import {
+  get,
+  onValue,
+  push,
+  ref,
+  remove,
+  set,
+  update,
+} from 'firebase/database';
 
-
-interface IRtdbSnapshot {
-  exists: () => boolean;
-  val: () => Record<string, any>;
-}
-
-interface IRtdbRef {
-  once: (event: string) => Promise<IRtdbSnapshot>;
-  push: () => { key: string | null; set: (value: unknown) => Promise<void> };
-  set: (value: unknown) => Promise<void>;
-  update: (value: unknown) => Promise<void>;
-  remove: () => Promise<void>;
-  on: (event: string, cb: (snap: IRtdbSnapshot) => void) => void;
-  off: (event: string, cb: (snap: IRtdbSnapshot) => void) => void;
-}
-
-const database = databaseModule.default as unknown as () => { ref: (path: string) => IRtdbRef };
 import {AuthContext} from '../../Auth/AuthContext';
+import {FIREBASE_REALTIME_DB} from '../../Firebase/firebase-config';
 import CryptoJS from 'crypto-js';
 import {
   getCurrentFormattedDate,
@@ -98,8 +90,8 @@ export const PasswordProvider = ({children}: {children: React.ReactNode}) => {
     if (!user) return;
 
     try {
-      const passwordsRef = database().ref(`passwords/${user.uid}`);
-      const snapshot = await passwordsRef.once('value');
+      const passwordsRef = ref(FIREBASE_REALTIME_DB, `passwords/${user.uid}`);
+      const snapshot = await get(passwordsRef);
 
       if (snapshot.exists()) {
         const passwordsData = snapshot.val();
@@ -128,8 +120,8 @@ export const PasswordProvider = ({children}: {children: React.ReactNode}) => {
     if (!user) return;
 
     try {
-      const passwordsRef = database().ref(`passwords/${user.uid}`);
-      const newPasswordRef = passwordsRef.push();
+      const passwordsRef = ref(FIREBASE_REALTIME_DB, `passwords/${user.uid}`);
+      const newPasswordRef = push(passwordsRef);
 
       const newPassword = {
         title,
@@ -140,7 +132,7 @@ export const PasswordProvider = ({children}: {children: React.ReactNode}) => {
         category: category || 'General',
       };
 
-      await newPasswordRef.set(newPassword);
+      await set(newPasswordRef, newPassword);
 
       setPasswords(prevPasswords => [
         ...prevPasswords,
@@ -163,7 +155,7 @@ export const PasswordProvider = ({children}: {children: React.ReactNode}) => {
     if (!user) return;
 
     try {
-      const passwordRef = database().ref(`passwords/${user.uid}/${id}`);
+      const passwordRef = ref(FIREBASE_REALTIME_DB, `passwords/${user.uid}/${id}`);
 
       const updatedPassword = {
         title,
@@ -173,7 +165,7 @@ export const PasswordProvider = ({children}: {children: React.ReactNode}) => {
         category: category || 'General',
       };
 
-      await passwordRef.update(updatedPassword);
+      await update(passwordRef, updatedPassword);
 
       setPasswords(prevPasswords =>
         prevPasswords.map(item =>
@@ -198,8 +190,8 @@ export const PasswordProvider = ({children}: {children: React.ReactNode}) => {
     if (!user) return;
 
     try {
-      const passwordRef = database().ref(`passwords/${user.uid}/${id}`);
-      await passwordRef.remove();
+      const passwordRef = ref(FIREBASE_REALTIME_DB, `passwords/${user.uid}/${id}`);
+      await remove(passwordRef);
 
       setPasswords(prevPasswords =>
         prevPasswords.filter(item => item.id !== id),
@@ -212,8 +204,8 @@ export const PasswordProvider = ({children}: {children: React.ReactNode}) => {
   const setupRealtimeListener = () => {
     if (!user) return;
 
-    const passwordsRef = database().ref(`passwords/${user.uid}`);
-    const onDataChange = (snapshot: IRtdbSnapshot) => {
+    const passwordsRef = ref(FIREBASE_REALTIME_DB, `passwords/${user.uid}`);
+    const onDataChange = (snapshot: any) => {
       if (snapshot.exists()) {
         const passwordsData = snapshot.val();
         const passwordsArray = Object.keys(passwordsData).map((key: string) => {
@@ -234,9 +226,7 @@ export const PasswordProvider = ({children}: {children: React.ReactNode}) => {
       }
     };
 
-    passwordsRef.on('value', onDataChange);
-
-    return () => passwordsRef.off('value', onDataChange);
+    return onValue(passwordsRef, onDataChange);
   };
 
   return (

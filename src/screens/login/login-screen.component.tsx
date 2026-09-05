@@ -10,6 +10,7 @@ import { Typography } from '../../components/widgets/typography';
 import MaterialSymbols from '../../components/widgets/material-icon';
 import { FIREBASE_AUTH } from '../../Firebase/firebase-config';
 import { CustomSnackbar } from '../../global/utils/snackbar.util';
+import { MotionView } from '../../motion';
 
 interface IProps {
   navigation: { navigate: (screen: string) => void };
@@ -32,7 +33,7 @@ export default function LoginScreen({ navigation }: IProps): JSX.Element {
     try {
       await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
       CustomSnackbar.success('Login successful! Redirecting...');
-    } catch (error) {
+    } catch {
       CustomSnackbar.error('Login Failed: Check your email and password!');
     } finally {
       setLoading(false);
@@ -42,7 +43,11 @@ export default function LoginScreen({ navigation }: IProps): JSX.Element {
   return (
     <ScreenContainer>
       <View style={[styles.container, { gap: spacing.xl }]}>
-        <View style={[styles.logoContainer, { gap: spacing.sm }]}>
+        <MotionView
+          enter="fade-down"
+          transition={{ type: 'spring', spring: 'snappy', delay: 40 }}
+          style={[styles.logoContainer, { gap: spacing.sm }]}
+        >
           <MaterialSymbols name="shield_lock" variant="filled" size={80} color={colors.accent} />
           <Typography variant="headingXl" color={colors.textPrimary} align="center">
             SecureVault
@@ -50,9 +55,13 @@ export default function LoginScreen({ navigation }: IProps): JSX.Element {
           <Typography variant="bodyMd" color={colors.textSecondary} align="center">
             Your passwords, protected
           </Typography>
-        </View>
+        </MotionView>
 
-        <View style={[styles.formContainer, { gap: spacing.lg }]}>
+        <MotionView
+          enter="fade-up"
+          transition={{ duration: 'gentle', delay: 140 }}
+          style={[styles.formContainer, { gap: spacing.lg }]}
+        >
           <Input
             label="Email address"
             placeholder="Email address"
@@ -91,9 +100,13 @@ export default function LoginScreen({ navigation }: IProps): JSX.Element {
             fullWidth
             loading={loading}
           />
-        </View>
+        </MotionView>
 
-        <View style={[styles.footer, { gap: spacing.xs }]}>
+        <MotionView
+          enter="fade"
+          transition={{ duration: 'fast', delay: 220 }}
+          style={[styles.footer, { gap: spacing.xs }]}
+        >
           <Typography variant="bodyMd" color={colors.textSecondary} align="center">
             Don&apos;t have an account?
           </Typography>
@@ -106,7 +119,7 @@ export default function LoginScreen({ navigation }: IProps): JSX.Element {
           >
             Sign Up
           </Typography>
-        </View>
+        </MotionView>
       </View>
     </ScreenContainer>
   );
