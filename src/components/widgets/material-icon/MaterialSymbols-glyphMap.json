@@ -134,5 +134,7 @@
   "dialpad": "\ue0bc",
   "keyboard_capslock": "\ue318",
   "text_fields": "\ue262",
-  "language": "\ue894"
+  "language": "\ue894",
+  "auto_awesome_motion": "\ue661",
+  "auto_awesome_mosaic": "\ue660"
 }

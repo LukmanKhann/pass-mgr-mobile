@@ -3,10 +3,10 @@ import React from 'react';
 import { Platform } from 'react-native';
 
 import { useTheme } from '../../hooks/use-theme.hook';
-import AddPasswordScreen from '../../screens/add-password/add-password-screen.component';
 import { SCREENS } from '../navigation.constant';
 import type { IMainTabParamList } from '../navigation.type';
 import { VaultStackNavigator } from './vault-stack-navigator.component';
+import { AddCredentialStackNavigator } from './add-credential-stack-navigator.component';
 import { GeneratorStackNavigator } from './generator-stack-navigator.component';
 import { SettingsStackNavigator } from './settings-stack-navigator.component';
 
@@ -59,7 +59,7 @@ export function BottomTabNavigator(): JSX.Element {
       />
       <Tab.Screen
         name={SCREENS.ADD_CREDENTIAL_TAB as 'AddCredentialTab'}
-        component={AddPasswordScreen}
+        component={AddCredentialStackNavigator}
         options={{
           tabBarLabel: 'Add',
           tabBarIcon: () =>

@@ -13,7 +13,6 @@ import {
 import { useTheme } from '../../hooks/use-theme.hook';
 import { Button } from '../../components/controls/button';
 import { Input } from '../../components/controls/input';
-import { ScreenContainer } from '../../components/layouts/screen-container';
 import { Typography } from '../../components/widgets/typography';
 import MaterialSymbols from '../../components/widgets/material-icon';
 import PasswordContext from '../../context/PasswordContext/password-context.component';
@@ -71,7 +70,7 @@ export default function AddPasswordScreen({ navigation }: IProps): JSX.Element {
 
   const handleGeneratePassword = (): void => {
     try {
-      const generated = generatePassword(16, {
+      const generated = generatePassword(8, {
         lowerCase: true,
         upperCase: true,
         numbers: true,
@@ -97,6 +96,11 @@ export default function AddPasswordScreen({ navigation }: IProps): JSX.Element {
     setLoading(true);
     try {
       await addPassword(title, username, password, category);
+      setTitle('');
+      setUsername('');
+      setPassword('');
+      setCategory('');
+      setErrors({});
       CustomSnackbar.success('Credentials saved successfully');
       navigation.navigate(SCREENS.VAULT_TAB);
     } catch {
@@ -107,13 +111,14 @@ export default function AddPasswordScreen({ navigation }: IProps): JSX.Element {
   };
 
   return (
-    <ScreenContainer>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           contentContainerStyle={[styles.scrollContent, { paddingBottom: 40 }]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          contentInsetAdjustmentBehavior="automatic"
         >
           <View
             style={[
@@ -218,7 +223,7 @@ export default function AddPasswordScreen({ navigation }: IProps): JSX.Element {
               ]}
             >
               <MaterialSymbols
-                name="auto_awesome"
+                name="auto_awesome_mosaic"
                 size={18}
                 color={colors.accent}
               />
@@ -313,13 +318,15 @@ export default function AddPasswordScreen({ navigation }: IProps): JSX.Element {
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
-    </ScreenContainer>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   scrollContent: {
-    paddingTop: 16,
     paddingBottom: 40,
   },
   card: {

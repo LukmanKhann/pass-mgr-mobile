@@ -1,6 +1,6 @@
 import type { IPasswordItem } from '../../global/types/common.type';
 
-export type ISortOrder = 'asc' | 'desc';
+export type ISortOrder = 'asc' | 'desc' | 'none';
 
 export interface IPasswordListCategory {
   id: string;
