@@ -1,5 +1,4 @@
 import { useCallback, useContext } from 'react';
-import { Alert } from 'react-native';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
 import { AuthContext } from '../../../Auth/AuthContext';
@@ -10,12 +9,7 @@ export function useAppSettings() {
   const { mode, setMode } = useTheme();
   const { signOut, user } = useContext(AuthContext);
 
-  const handleLogout = useCallback(() => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive', onPress: signOut },
-    ]);
-  }, [signOut]);
+  const handleLogout = useCallback(() => {}, [signOut]);
 
   const handleBackupSync = useCallback(() => {
     CustomSnackbar.info('Coming Soon', 'This feature will be available soon');
@@ -55,6 +49,7 @@ export function useAppSettings() {
     mode,
     handleModeChange,
     user,
+    signOut,
     handleLogout,
     handleBackupSync,
     handleExportData,

@@ -99,7 +99,6 @@ export function SecuritySection({ securitySettings, passwordSettings }: IProps):
           />
         }
       />
-      <SettingItem icon="edit" title="Change Master Password" subtitle="Update your master password" showArrow />
     </>
   );
 }

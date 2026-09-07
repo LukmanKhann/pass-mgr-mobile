@@ -36,7 +36,7 @@ export function Input({
           },
         ]}
       >
-        {leftIcon && <View style={{ marginRight: sp.sm }}>{leftIcon}</View>}
+        {leftIcon && <View style={{ marginRight: sp.sm, alignSelf: 'center' }}>{leftIcon}</View>}
         <TextInput
           style={[
             styles.textInput,
@@ -50,7 +50,7 @@ export function Input({
           {...props}
         />
         {rightIcon && (
-          <TouchableOpacity style={{ marginLeft: sp.sm }} onPress={onRightIconPress} disabled={!onRightIconPress}>
+          <TouchableOpacity style={{ marginLeft: sp.sm, alignSelf: 'center' }} onPress={onRightIconPress} disabled={!onRightIconPress}>
             {rightIcon}
           </TouchableOpacity>
         )}
@@ -79,7 +79,10 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '400',
-    lineHeight: 24,
-    paddingVertical: 12,
+    lineHeight: 20,
+    paddingTop: 14,
+    paddingBottom: 14,
+    textAlignVertical: 'center',
   },
+
 });

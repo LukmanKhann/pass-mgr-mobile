@@ -15,6 +15,7 @@ import AppNavigator from './src/navigation/app-navigator.component';
 import { ThemeProvider } from './src/context/theme-context.component';
 import { useTheme } from './src/hooks/use-theme.hook';
 import { AuthProvider, AuthContext } from './src/Auth/AuthContext';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PasswordProvider } from './src/context/PasswordContext/password-context.component';
 import { ToastHost } from './src/global/utils/nitro-toast.util';
 import type { IColorTokens } from './src/theme/colors.theme';
@@ -159,10 +160,12 @@ function App(): JSX.Element {
     <ThemeProvider>
       <AuthProvider>
         <PasswordProvider>
-          <ThemedPaperProvider>
-            <ToastHost />
-            <AppContent />
-          </ThemedPaperProvider>
+          <BottomSheetModalProvider>
+            <ThemedPaperProvider>
+              <ToastHost />
+              <AppContent />
+            </ThemedPaperProvider>
+          </BottomSheetModalProvider>
         </PasswordProvider>
       </AuthProvider>
     </ThemeProvider>

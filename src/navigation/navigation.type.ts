@@ -17,6 +17,7 @@ export type IGeneratorStackParamList = {
 export type ISettingsStackParamList = {
   Settings: undefined;
   Appearance: undefined;
+  NumericPassword: { mode?: 'verify' | 'set'; title?: string; subtitle?: string };
 };
 
 export type IAddCredentialParamList = undefined;

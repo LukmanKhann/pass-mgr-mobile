@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Keyboard, Modal, SafeAreaView, StyleSheet, View } from 'react-native';
+import { Animated, Keyboard, Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
 import type { TextInputInstance } from 'react-native';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
@@ -173,20 +173,26 @@ export default function NumericPasswordModal({
     mode === 'set' && isConfirmMode ? 'Re-enter your password to confirm' : subtitle;
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
-      <SafeAreaView style={[styles.overlay, { backgroundColor: colors.overlay }]}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+      <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
+        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
         <Animated.View
           style={[
             styles.container,
             {
               opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }, { translateX: shakeAnimation }],
+              transform: [{ translateY: fadeAnim.interpolate({ inputRange: [0, 1], outputRange: [300, 0] }) }, { translateX: shakeAnimation }],
               backgroundColor: colors.surface,
-              borderRadius: borderRadius.xl,
-              padding: spacing.xl,
+              borderTopLeftRadius: borderRadius.xl,
+              borderTopRightRadius: borderRadius.xl,
             },
           ]}
         >
+          <View style={styles.closeRow}>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton} activeOpacity={0.7}>
+              <MaterialSymbols name="close" size={24} color={colors.textPrimary} />
+            </TouchableOpacity>
+          </View>
           <View style={[styles.header, { gap: spacing.sm }]}>
             <View style={[styles.headerIcon, { borderRadius: borderRadius.full, backgroundColor: colors.surfaceElevated }]}>
               <MaterialSymbols name="lock" size={32} color={colors.accent} />
@@ -218,25 +224,38 @@ export default function NumericPasswordModal({
             ) : null}
           </View>
         </Animated.View>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   overlay: {
-    flex:  1,
-    justifyContent: 'center',
+    flex: 1,
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    padding: 24,
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFill,
   },
   container: {
     width: '100%',
     alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 32,
+  },
+  closeRow: {
+    width: '100%',
+    alignItems: 'flex-end',
+  },
+  closeButton: {
+    padding: 8,
   },
   header: {
     alignItems: 'center',
     marginBottom: 16,
+    marginTop: 4,
   },
   headerIcon: {
     width: 64,
@@ -245,7 +264,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   footer: {
-    marginTop:  16,
+    marginTop: 16,
     alignItems: 'center',
   },
 });

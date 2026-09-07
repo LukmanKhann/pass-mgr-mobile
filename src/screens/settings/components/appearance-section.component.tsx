@@ -57,7 +57,7 @@ export function AppearanceSection({ navigation, mode }: IProps): JSX.Element {
             styles.iconContainer,
             {
               backgroundColor: colors.surfaceElevated,
-              borderRadius: borderRadius.full,
+              borderRadius: borderRadius.md,
             },
           ]}
         >
@@ -69,7 +69,7 @@ export function AppearanceSection({ navigation, mode }: IProps): JSX.Element {
         </View>
         <View style={styles.textContainer}>
           <Typography
-            variant="bodyLg"
+            variant="bodyMd"
             color={colors.textPrimary}
             fontWeight="600"
           >
@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
     borderWidth: 1,
+    marginBottom: 8,
   },
   content: {
     flexDirection: 'row',
@@ -101,8 +102,8 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },

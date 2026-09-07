@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import NumericPasswordModal from '../../components/Biometric/components/numeric-password-modal.component';
 import MaterialSymbols from '../../components/widgets/material-icon';
 
 import { useTheme } from '../../hooks/use-theme.hook';
@@ -15,6 +14,7 @@ import { AppearanceSection } from './components/appearance-section.component';
 import { DataSection } from './components/data-section.component';
 import { SecuritySection } from './components/security-section.component';
 import { SupportSection } from './components/support-section.component';
+import { LogoutModal } from './components/logout-modal.component';
 import { UserProfileHeader } from './components/user-profile-header.component';
 import { HeaderShadow } from '../../components/layouts/header-shadow';
 import type { ISettingsStackParamList } from '../../navigation/navigation.type';
@@ -36,6 +36,8 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
     },
   };
 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   const appSettings = useAppSettings();
   const securitySettings = useSecuritySettings();
   const passwordSettings = usePasswordSettings({
@@ -44,6 +46,25 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
     setBiometricEnabled: securitySettings.handleBiometricToggle,
     biometricEnabled: securitySettings.biometricEnabled,
   });
+
+  const passwordUI = useMemo(
+    () => ({
+      ...passwordSettings,
+      handleSetNumericPassword: () => {
+        navigation.navigate('NumericPassword', {
+          mode: 'set',
+          title: securitySettings.hasNumericPassword
+            ? 'Change Password'
+            : 'Set Numeric Password',
+          subtitle: securitySettings.hasNumericPassword
+            ? 'Create a new 4-digit password'
+            : 'Create a 4-digit password to unlock your vault',
+        });
+      },
+      handleRemoveNumericPassword: passwordSettings.handleRemoveNumericPassword,
+    }),
+    [navigation, passwordSettings, securitySettings.hasNumericPassword],
+  );
 
   if (securitySettings.loading) {
     return (
@@ -69,7 +90,7 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
         <UserProfileHeader />
         <SecuritySection
           securitySettings={securitySettings}
-          passwordSettings={passwordSettings}
+          passwordSettings={passwordUI}
         />
         <AppearanceSection navigation={navigation} mode={appSettings.mode} />
         <DataSection
@@ -86,7 +107,7 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
         <View style={[styles.logout, dynamicStyles.logoutMargin]}>
           <Button
             title="Sign Out"
-            onPress={appSettings.handleLogout}
+            onPress={() => setShowLogoutModal(true)}
             variant="danger"
             fullWidth
             icon={
@@ -123,28 +144,13 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
         </View>
       </ScrollView>
 
-      <NumericPasswordModal
-        visible={passwordSettings.showSetPasswordModal}
-        onClose={() => passwordSettings.setShowSetPasswordModal(false)}
-        onSuccess={(password: string) =>
-          void passwordSettings.handlePasswordSet(password)
-        }
-        title="Set Numeric Password"
-        subtitle="Create a 4-digit password to unlock your vault"
-        mode="set"
-        maxLength={4}
-      />
-
-      <NumericPasswordModal
-        visible={passwordSettings.showChangePasswordModal}
-        onClose={() => passwordSettings.setShowChangePasswordModal(false)}
-        onSuccess={(password: string) =>
-          void passwordSettings.handlePasswordSet(password)
-        }
-        title="Change Password"
-        subtitle="Create a new 4-digit password"
-        mode="set"
-        maxLength={4}
+      <LogoutModal
+        visible={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={() => {
+          setShowLogoutModal(false);
+          void appSettings.signOut?.();
+        }}
       />
     </View>
   );

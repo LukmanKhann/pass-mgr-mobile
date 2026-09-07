@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { useTheme } from '../../hooks/use-theme.hook';
 import { EmptyState } from '../../components/widgets/empty-state';
+import { SkeletonLoader } from '../../components/skeleton';
 import { usePasswordList } from './hooks/use-password-list.hook';
 import { EditPasswordModal } from './components/edit-password-modal.component';
 import { PasswordItem } from './components/password-item.component';
@@ -138,6 +139,7 @@ export default function PasswordListScreen({ navigation }: Props): JSX.Element {
       />
 
       <View style={styles.container}>
+        <SkeletonLoader loading={loading} count={5}>
         <FlatList
           style={styles.list}
           data={displayData}
@@ -162,6 +164,7 @@ export default function PasswordListScreen({ navigation }: Props): JSX.Element {
           initialNumToRender={8}
           contentInsetAdjustmentBehavior="automatic"
         />
+        </SkeletonLoader>
 
         <EditPasswordModal
           visible={modalVisible}

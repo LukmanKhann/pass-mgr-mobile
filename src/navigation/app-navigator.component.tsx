@@ -15,11 +15,14 @@ import LoadingScreen from '../screens/loading/loading-screen.component';
 import LoginScreen from '../screens/login/login-screen.component';
 import SignUpScreen from '../screens/sign-up/sign-up-screen.component';
 import { BottomTabNavigator } from './tabs/bottom-tab-navigator.component';
+import NumericPasswordScreen from '../screens/numeric-password/numeric-password-screen.component';
+import AppearanceScreen from '../screens/settings/appearance.screen';
 import { SCREENS } from './navigation.constant';
 import { createAuthScreenOptions } from './shared/navigation.util';
 import type { IAuthStackParamList } from './navigation.type';
 
 const AuthStack = createNativeStackNavigator<IAuthStackParamList>();
+const RootStack = createNativeStackNavigator<any>();
 
 const PERSISTENCE_KEY = 'NAVIGATION_STATE_V1';
 
@@ -75,7 +78,29 @@ function AppNavigatorInner(): JSX.Element {
       }
     >
       {user ? (
-        <BottomTabNavigator />
+        <RootStack.Navigator
+          screenOptions={{ headerShown: false, headerBackTitle: '' }}
+        >
+          <RootStack.Screen name="Main" component={BottomTabNavigator} />
+          <RootStack.Screen
+            name="NumericPassword"
+            component={NumericPasswordScreen}
+            options={{
+              headerShown: true,
+              title: 'Numeric Password',
+              headerBackTitle: 'Back',
+            }}
+          />
+          <RootStack.Screen
+            name="Appearance"
+            component={AppearanceScreen}
+            options={{
+              headerShown: true,
+              title: 'Appearance',
+              headerBackTitle: 'Back',
+            }}
+          />
+        </RootStack.Navigator>
       ) : (
         <AuthStack.Navigator screenOptions={createAuthScreenOptions(colors)}>
           <AuthStack.Screen
