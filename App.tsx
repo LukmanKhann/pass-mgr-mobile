@@ -1,17 +1,23 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AppState } from 'react-native';
-import { MD3DarkTheme, MD3LightTheme, PaperProvider, type MD3Theme } from 'react-native-paper';
+import {
+  MD3DarkTheme,
+  MD3LightTheme,
+  PaperProvider,
+  type MD3Theme,
+} from 'react-native-paper';
 
-import AppNavigator from './src/navigation/app-navigator.component';
-import { ThemeProvider } from './src/context/theme-context.component';
-import { useTheme } from './src/hooks/use-theme.hook';
-import type { IColorTokens } from './src/theme/colors.theme';
-import { AuthProvider, AuthContext } from './src/Auth/AuthContext';
-import { PasswordProvider } from './src/context/PasswordContext/password-context.component';
-import { SnackbarHost } from './src/global/utils/snackbar.util';
 import AuthLockScreen from './src/components/Biometric/auth/auth-lock-screen.component';
 import BiometricAuthService from './src/components/Biometric/service/BiometricAuth';
 import LoadingScreen from './src/screens/loading/loading-screen.component';
+import AppNavigator from './src/navigation/app-navigator.component';
+
+import { ThemeProvider } from './src/context/theme-context.component';
+import { useTheme } from './src/hooks/use-theme.hook';
+import { AuthProvider, AuthContext } from './src/Auth/AuthContext';
+import { PasswordProvider } from './src/context/PasswordContext/password-context.component';
+import { ToastHost } from './src/global/utils/nitro-toast.util';
+import type { IColorTokens } from './src/theme/colors.theme';
 
 function AppContent(): JSX.Element {
   const { user, loading } = useContext(AuthContext);
@@ -135,9 +141,17 @@ function getPaperTheme(isDark: boolean, colors: IColorTokens): MD3Theme {
   };
 }
 
-function ThemedPaperProvider({ children }: { children: React.ReactNode }): React.ReactElement {
+function ThemedPaperProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.ReactElement {
   const { colors, isDark } = useTheme();
-  return <PaperProvider theme={getPaperTheme(isDark, colors)}>{children}</PaperProvider>;
+  return (
+    <PaperProvider theme={getPaperTheme(isDark, colors)}>
+      {children}
+    </PaperProvider>
+  );
 }
 
 function App(): JSX.Element {
@@ -146,7 +160,7 @@ function App(): JSX.Element {
       <AuthProvider>
         <PasswordProvider>
           <ThemedPaperProvider>
-            <SnackbarHost />
+            <ToastHost />
             <AppContent />
           </ThemedPaperProvider>
         </PasswordProvider>

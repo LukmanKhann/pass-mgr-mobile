@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Alert } from 'react-native';
 
 import BiometricAuthService from '../../../components/Biometric/service/BiometricAuth';
-import { CustomSnackbar } from '../../../global/utils/snackbar.util';
+
+import { CustomSnackbar } from '../../../global/utils/nitro-toast.util';
 
 interface IUsePasswordSettingsParams {
   hasNumericPassword: boolean;
@@ -37,7 +38,9 @@ export function usePasswordSettings({
         setHasNumericPassword(true);
         setShowSetPasswordModal(false);
         setShowChangePasswordModal(false);
-        CustomSnackbar.success('Your numeric password has been set successfully.');
+        CustomSnackbar.success(
+          'Your numeric password has been set successfully.',
+        );
         return true;
       }
       CustomSnackbar.error('Failed to set password. Please try again.');
@@ -65,9 +68,13 @@ export function usePasswordSettings({
                 setHasNumericPassword(false);
                 if (biometricEnabled) {
                   setBiometricEnabled(false, true);
-                  CustomSnackbar.success('Numeric password and biometric login removed successfully.');
+                  CustomSnackbar.success(
+                    'Numeric password and biometric login removed successfully.',
+                  );
                 } else {
-                  CustomSnackbar.success('Numeric password removed successfully.');
+                  CustomSnackbar.success(
+                    'Numeric password removed successfully.',
+                  );
                 }
               } else {
                 CustomSnackbar.error('Failed to remove numeric password.');

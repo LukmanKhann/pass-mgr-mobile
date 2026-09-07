@@ -2,9 +2,10 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { Alert } from 'react-native';
 
-import { CustomSnackbar } from '../../../global/utils/snackbar.util';
 import PasswordContext from '../../../context/PasswordContext/password-context.component';
+
 import type { IPasswordItem } from '../../../global/types/common.type';
+import { CustomSnackbar } from '../../../global/utils/nitro-toast.util';
 
 interface IPasswordListState {
   filteredPasswords: IPasswordItem[];
@@ -42,10 +43,13 @@ export function usePasswordList(): IPasswordListState {
   const [password, setPassword] = useState('');
   const [category, setCategory] = useState('');
   const [modalPasswordVisible, setModalPasswordVisible] = useState(false);
-  const [passwordVisible, setPasswordVisible] = useState<Record<string, boolean>>({});
+  const [passwordVisible, setPasswordVisible] = useState<
+    Record<string, boolean>
+  >({});
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredPasswords, setFilteredPasswords] = useState<IPasswordItem[]>(passwords);
+  const [filteredPasswords, setFilteredPasswords] =
+    useState<IPasswordItem[]>(passwords);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -63,7 +67,10 @@ export function usePasswordList(): IPasswordListState {
   }, [passwords, searchQuery]);
 
   const showSnackbar = useCallback(
-    (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') => {
+    (
+      message: string,
+      type: 'success' | 'error' | 'warning' | 'info' = 'info',
+    ) => {
       CustomSnackbar[type](message);
     },
     [],
@@ -86,24 +93,29 @@ export function usePasswordList(): IPasswordListState {
 
   const handleDelete = useCallback(
     (id: string) => {
-      Alert.alert('Delete Password', 'Are you sure you want to delete this password?', [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setLoading(true);
-              await deletePassword(id);
-              showSnackbar('Password deleted successfully', 'success');
-            } catch (error) {
-              showSnackbar('Failed to delete password', 'error');
-            } finally {
-              setLoading(false);
-            }
+      Alert.alert(
+        'Delete Password',
+        'Are you sure you want to delete this password?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                setLoading(true);
+                await deletePassword(id);
+                showSnackbar('Password deleted successfully', 'success');
+              } catch (error) {
+                showSnackbar('Failed to delete password', 'error');
+              } finally {
+                setLoading(false);
+              }
+            },
           },
-        },
-      ], { cancelable: true });
+        ],
+        { cancelable: true },
+      );
     },
     [deletePassword, showSnackbar],
   );

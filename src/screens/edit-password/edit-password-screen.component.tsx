@@ -1,21 +1,25 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
+import MaterialSymbols from '../../components/widgets/material-icon';
+import PasswordContext from '../../context/PasswordContext/password-context.component';
+
 import { useTheme } from '../../hooks/use-theme.hook';
 import { Button } from '../../components/controls/button';
 import { Input } from '../../components/controls/input';
 import { ScreenContainer } from '../../components/layouts/screen-container';
 import { Typography } from '../../components/widgets/typography';
-import MaterialSymbols from '../../components/widgets/material-icon';
-import PasswordContext from '../../context/PasswordContext/password-context.component';
-import { CustomSnackbar } from '../../global/utils/snackbar.util';
+import { CustomSnackbar } from '../../global/utils/nitro-toast.util';
 
 interface IProps {
   navigation: { navigate: (screen: string) => void };
   route: { params: { id: string } };
 }
 
-export default function EditPasswordScreen({ navigation, route }: IProps): JSX.Element {
+export default function EditPasswordScreen({
+  navigation,
+  route,
+}: IProps): JSX.Element {
   const { colors, spacing } = useTheme();
   const { passwords, editPassword } = useContext(PasswordContext);
   const { id } = route.params;
@@ -53,10 +57,17 @@ export default function EditPasswordScreen({ navigation, route }: IProps): JSX.E
 
   return (
     <ScreenContainer>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={[styles.header, { gap: spacing.sm }]}>
           <MaterialSymbols name="edit" size={40} color={colors.accent} />
-          <Typography variant="headingMd" color={colors.textPrimary} align="center">
+          <Typography
+            variant="headingMd"
+            color={colors.textPrimary}
+            align="center"
+          >
             Edit Credentials
           </Typography>
         </View>

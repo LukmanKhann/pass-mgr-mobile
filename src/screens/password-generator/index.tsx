@@ -18,7 +18,7 @@ import MaterialSymbols from '../../components/widgets/material-icon';
 import { useTheme } from '../../hooks/use-theme.hook';
 import { Button } from '../../components/controls/button';
 import { Typography } from '../../components/widgets/typography';
-import { CustomSnackbar } from '../../global/utils/snackbar.util';
+import { CustomSnackbar } from '../../global/utils/nitro-toast.util';
 import {
   calculatePasswordStrength,
   generatePassword,

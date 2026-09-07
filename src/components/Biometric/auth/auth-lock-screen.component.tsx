@@ -1,20 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Animated, AppState, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Animated,
+  AppState,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+import MaterialSymbols from '../../widgets/material-icon';
+import BiometricAuthService from '../service/BiometricAuth';
+import NumericPasswordModal from '../components/numeric-password-modal.component';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
 import { AppModal } from '../../../components/widgets/modal';
 import { Typography } from '../../widgets/typography';
-import MaterialSymbols from '../../widgets/material-icon';
-import BiometricAuthService from '../service/BiometricAuth';
-import NumericPasswordModal from '../components/numeric-password-modal.component';
-import { CustomSnackbar } from '../../../global/utils/snackbar.util';
+import { CustomSnackbar } from '../../../global/utils/nitro-toast.util';
 
 interface IProps {
   onAuthenticated: () => void;
   onSetupRequired: () => void;
 }
 
-export default function AuthLockScreen({ onAuthenticated, onSetupRequired }: IProps): JSX.Element {
+export default function AuthLockScreen({
+  onAuthenticated,
+  onSetupRequired,
+}: IProps): JSX.Element {
   const { colors, spacing, borderRadius } = useTheme();
   const [showNumericModal, setShowNumericModal] = useState(false);
   const [biometryType, setBiometryType] = useState('Biometric');
@@ -47,7 +57,10 @@ export default function AuthLockScreen({ onAuthenticated, onSetupRequired }: IPr
       }
     };
 
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
 
     return () => {
       subscription?.remove();
@@ -109,19 +122,21 @@ export default function AuthLockScreen({ onAuthenticated, onSetupRequired }: IPr
         useNativeDriver: true,
       }),
       Animated.timing(shakeAnim, {
-        toValue:  10,
-        duration:  100,
+        toValue: 10,
+        duration: 100,
         useNativeDriver: true,
       }),
       Animated.timing(shakeAnim, {
-        toValue:  0,
-        duration:  100,
+        toValue: 0,
+        duration: 100,
         useNativeDriver: true,
       }),
     ]).start();
   };
 
-  const handleBiometricAuth = async (isCancelled: boolean = false): Promise<void> => {
+  const handleBiometricAuth = async (
+    isCancelled: boolean = false,
+  ): Promise<void> => {
     if (isCancelled) {
       setShowBiometricCancelled(true);
       return;
@@ -154,7 +169,9 @@ export default function AuthLockScreen({ onAuthenticated, onSetupRequired }: IPr
 
   const handleNumericAuth = async (password: string): Promise<boolean> => {
     try {
-      const isValid = await BiometricAuthService.verifyNumericPassword(password);
+      const isValid = await BiometricAuthService.verifyNumericPassword(
+        password,
+      );
 
       if (isValid) {
         setShowNumericModal(false);
@@ -175,7 +192,9 @@ export default function AuthLockScreen({ onAuthenticated, onSetupRequired }: IPr
           });
           setShowCustomModal(true);
         } else {
-          CustomSnackbar.error(`Invalid password. ${5 - attempts - 1} attempts remaining.`);
+          CustomSnackbar.error(
+            `Invalid password. ${5 - attempts - 1} attempts remaining.`,
+          );
         }
         return false;
       }
@@ -213,8 +232,15 @@ export default function AuthLockScreen({ onAuthenticated, onSetupRequired }: IPr
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.loadingContainer}>
-          <View style={[styles.logoDim, { backgroundColor: colors.surfaceElevated }]} />
-          <Typography variant="bodyMd" color={colors.textSecondary}>Initializing...</Typography>
+          <View
+            style={[
+              styles.logoDim,
+              { backgroundColor: colors.surfaceElevated },
+            ]}
+          />
+          <Typography variant="bodyMd" color={colors.textSecondary}>
+            Initializing...
+          </Typography>
         </View>
       </View>
     );
@@ -223,17 +249,40 @@ export default function AuthLockScreen({ onAuthenticated, onSetupRequired }: IPr
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.logoContainer, { marginTop: spacing.xxl }]}>
-        <View style={[styles.logo, { backgroundColor: colors.surfaceElevated, borderRadius: borderRadius.full }]}>
+        <View
+          style={[
+            styles.logo,
+            {
+              backgroundColor: colors.surfaceElevated,
+              borderRadius: borderRadius.full,
+            },
+          ]}
+        >
           <Animated.View style={{ opacity: fadeAnim }}>
-            <MaterialSymbols name="shield_lock" variant="filled" size={40} color={colors.accent} />
+            <MaterialSymbols
+              name="shield_lock"
+              variant="filled"
+              size={40}
+              color={colors.accent}
+            />
           </Animated.View>
         </View>
-        <Typography variant="headingXl" color={colors.textPrimary}>SecureVault</Typography>
-        <Typography variant="bodyMd" color={colors.textSecondary}>Your passwords, secured</Typography>
+        <Typography variant="headingXl" color={colors.textPrimary}>
+          SecureVault
+        </Typography>
+        <Typography variant="bodyMd" color={colors.textSecondary}>
+          Your passwords, secured
+        </Typography>
       </View>
       <View style={[styles.authContainer, { paddingHorizontal: spacing.xl }]}>
-        <Typography variant="headingMd" color={colors.textPrimary}>Welcome Back</Typography>
-        <Typography variant="bodyMd" color={colors.textSecondary} align="center">
+        <Typography variant="headingMd" color={colors.textPrimary}>
+          Welcome Back
+        </Typography>
+        <Typography
+          variant="bodyMd"
+          color={colors.textSecondary}
+          align="center"
+        >
           Unlock your vault to access your passwords
         </Typography>
         {authMethods.numeric && !showBiometricCancelled && (
@@ -242,9 +291,18 @@ export default function AuthLockScreen({ onAuthenticated, onSetupRequired }: IPr
               Having trouble with biometric authentication?
             </Typography>
             <TouchableOpacity
-              style={[styles.helpButton, { backgroundColor: colors.accent, borderRadius: borderRadius.md }]}
-              onPress={handleUseNumeric}>
-              <Typography variant="buttonMd" color={colors.textOnAccent}>Use Numeric Password</Typography>
+              style={[
+                styles.helpButton,
+                {
+                  backgroundColor: colors.accent,
+                  borderRadius: borderRadius.md,
+                },
+              ]}
+              onPress={handleUseNumeric}
+            >
+              <Typography variant="buttonMd" color={colors.textOnAccent}>
+                Use Numeric Password
+              </Typography>
             </TouchableOpacity>
           </View>
         )}
@@ -271,43 +329,43 @@ export default function AuthLockScreen({ onAuthenticated, onSetupRequired }: IPr
 
 const styles = StyleSheet.create({
   container: {
-    flex:  1,
+    flex: 1,
   },
   loadingContainer: {
-    flex:  1,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap:  8,
+    gap: 8,
   },
   logoDim: {
-    width:  40,
-    height:  40,
-    borderRadius:  9999,
+    width: 40,
+    height: 40,
+    borderRadius: 9999,
   },
   logoContainer: {
     alignItems: 'center',
-    gap:  4,
+    gap: 4,
   },
   logo: {
-    width:  96,
-    height:  96,
+    width: 96,
+    height: 96,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom:  12,
+    marginBottom: 12,
   },
   authContainer: {
-    flex:  1,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap:  8,
+    gap: 8,
   },
   helpContainer: {
     alignItems: 'center',
-    gap:  8,
-    marginTop:  12,
+    gap: 8,
+    marginTop: 12,
   },
   helpButton: {
-    paddingVertical:  8,
-    paddingHorizontal:  16,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
   },
 });

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import NumericPasswordModal from '../../components/Biometric/components/numeric-password-modal.component';
 import MaterialSymbols from '../../components/widgets/material-icon';
@@ -16,9 +17,25 @@ import { SecuritySection } from './components/security-section.component';
 import { SupportSection } from './components/support-section.component';
 import { UserProfileHeader } from './components/user-profile-header.component';
 import { HeaderShadow } from '../../components/layouts/header-shadow';
+import type { ISettingsStackParamList } from '../../navigation/navigation.type';
 
-export default function SettingsScreen(): JSX.Element {
+type Props = NativeStackScreenProps<ISettingsStackParamList, 'Settings'>;
+
+export default function SettingsScreen({ navigation }: Props): JSX.Element {
   const { colors, spacing } = useTheme();
+
+  const dynamicStyles = {
+    containerBackground: {
+      backgroundColor: colors.background,
+    },
+    logoutMargin: {
+      marginTop: spacing.xl,
+    },
+    versionGap: {
+      gap: spacing.xs,
+    },
+  };
+
   const appSettings = useAppSettings();
   const securitySettings = useSecuritySettings();
   const passwordSettings = usePasswordSettings({
@@ -30,7 +47,7 @@ export default function SettingsScreen(): JSX.Element {
 
   if (securitySettings.loading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, dynamicStyles.containerBackground]}>
         <Typography
           variant="bodyMd"
           color={colors.textSecondary}
@@ -43,7 +60,7 @@ export default function SettingsScreen(): JSX.Element {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, dynamicStyles.containerBackground]}>
       <HeaderShadow />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -54,10 +71,7 @@ export default function SettingsScreen(): JSX.Element {
           securitySettings={securitySettings}
           passwordSettings={passwordSettings}
         />
-        <AppearanceSection
-          isDark={appSettings.isDark}
-          toggleTheme={appSettings.toggleTheme}
-        />
+        <AppearanceSection navigation={navigation} mode={appSettings.mode} />
         <DataSection
           handleBackupSync={appSettings.handleBackupSync}
           handleExportData={appSettings.handleExportData}
@@ -69,7 +83,7 @@ export default function SettingsScreen(): JSX.Element {
           handleRateApp={appSettings.handleRateApp}
         />
 
-        <View style={[styles.logout, { marginTop: spacing.xl }]}>
+        <View style={[styles.logout, dynamicStyles.logoutMargin]}>
           <Button
             title="Sign Out"
             onPress={appSettings.handleLogout}
@@ -86,7 +100,11 @@ export default function SettingsScreen(): JSX.Element {
         </View>
 
         <View
-          style={[styles.version, { gap: spacing.xs, marginTop: spacing.xl }]}
+          style={[
+            styles.version,
+            dynamicStyles.versionGap,
+            dynamicStyles.logoutMargin,
+          ]}
         >
           <Typography
             variant="caption"

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 
 import BiometricAuthService from '../../../components/Biometric/service/BiometricAuth';
-import { CustomSnackbar } from '../../../global/utils/snackbar.util';
+
+import { CustomSnackbar } from '../../../global/utils/nitro-toast.util';
 
 export function useSecuritySettings() {
   const [biometricEnabled, setBiometricEnabled] = useState(false);
@@ -46,40 +47,46 @@ export function useSecuritySettings() {
 
   const handleBiometricToggle = useCallback(
     async (enabled: boolean, suppressSnackbar: boolean = false) => {
-    try {
-      if (enabled && !hasNumericPassword) {
-        Alert.alert(
-          'Numeric Password Required',
-          'You must set up a numeric password before enabling biometric authentication.',
-          [{ text: 'OK', style: 'default' }],
-        );
-        return false;
-      }
-      if (enabled && !biometricAvailable) {
-        if (!suppressSnackbar) {
-          CustomSnackbar.warning('Biometric authentication is not available on this device.');
+      try {
+        if (enabled && !hasNumericPassword) {
+          Alert.alert(
+            'Numeric Password Required',
+            'You must set up a numeric password before enabling biometric authentication.',
+            [{ text: 'OK', style: 'default' }],
+          );
+          return false;
         }
-        return false;
-      }
-      const success = await BiometricAuthService.setBiometricEnabled(enabled);
-      if (success) {
-        setBiometricEnabled(enabled);
-        if (!suppressSnackbar) {
-          if (enabled) {
-            CustomSnackbar.success(`${biometryType} authentication has been enabled successfully.`);
-          } else {
-            CustomSnackbar.error('Biometric authentication has been disabled.');
+        if (enabled && !biometricAvailable) {
+          if (!suppressSnackbar) {
+            CustomSnackbar.warning(
+              'Biometric authentication is not available on this device.',
+            );
           }
+          return false;
         }
-        return true;
+        const success = await BiometricAuthService.setBiometricEnabled(enabled);
+        if (success) {
+          setBiometricEnabled(enabled);
+          if (!suppressSnackbar) {
+            if (enabled) {
+              CustomSnackbar.success(
+                `${biometryType} authentication has been enabled successfully.`,
+              );
+            } else {
+              CustomSnackbar.error(
+                'Biometric authentication has been disabled.',
+              );
+            }
+          }
+          return true;
+        }
+        return false;
+      } catch (error) {
+        if (!suppressSnackbar) {
+          CustomSnackbar.error('Failed to update biometric settings.');
+        }
+        return false;
       }
-      return false;
-    } catch (error) {
-      if (!suppressSnackbar) {
-        CustomSnackbar.error('Failed to update biometric settings.');
-      }
-      return false;
-    }
     },
     [hasNumericPassword, biometricAvailable, biometryType],
   );

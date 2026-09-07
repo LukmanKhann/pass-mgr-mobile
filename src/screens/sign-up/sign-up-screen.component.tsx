@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
-import { Keyboard, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import {
+  Keyboard,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+
+import MaterialSymbols from '../../components/widgets/material-icon';
 
 import { useTheme } from '../../hooks/use-theme.hook';
 import { Button } from '../../components/controls/button';
@@ -8,9 +15,8 @@ import { Input } from '../../components/controls/input';
 import { ScreenContainer } from '../../components/layouts/screen-container';
 import { ScrollContainer } from '../../components/layouts/scroll-container';
 import { Typography } from '../../components/widgets/typography';
-import MaterialSymbols from '../../components/widgets/material-icon';
 import { FIREBASE_AUTH } from '../../Firebase/firebase-config';
-import { CustomSnackbar } from '../../global/utils/snackbar.util';
+import { CustomSnackbar } from '../../global/utils/nitro-toast.util';
 
 interface IProps {
   navigation: { navigate: (screen: string) => void; goBack: () => void };
@@ -77,11 +83,23 @@ export default function SignUpScreen({ navigation }: IProps): JSX.Element {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollContainer contentContainerStyle={styles.scrollContent}>
           <View style={[styles.header, { gap: spacing.sm }]}>
-            <MaterialSymbols name="account_circle" size={72} color={colors.accent} />
-            <Typography variant="headingXl" color={colors.textPrimary} align="center">
+            <MaterialSymbols
+              name="account_circle"
+              size={72}
+              color={colors.accent}
+            />
+            <Typography
+              variant="headingXl"
+              color={colors.textPrimary}
+              align="center"
+            >
               Create Account
             </Typography>
-            <Typography variant="bodyMd" color={colors.textSecondary} align="center">
+            <Typography
+              variant="bodyMd"
+              color={colors.textSecondary}
+              align="center"
+            >
               Join SecureVault today
             </Typography>
           </View>
@@ -94,7 +112,11 @@ export default function SignUpScreen({ navigation }: IProps): JSX.Element {
               value={name}
               onChangeText={setName}
               leftIcon={
-                <MaterialSymbols name="person" size={20} color={colors.textTertiary} />
+                <MaterialSymbols
+                  name="person"
+                  size={20}
+                  color={colors.textTertiary}
+                />
               }
             />
             <Input
@@ -106,7 +128,11 @@ export default function SignUpScreen({ navigation }: IProps): JSX.Element {
               value={email}
               onChangeText={setEmail}
               leftIcon={
-                <MaterialSymbols name="mail" size={20} color={colors.textTertiary} />
+                <MaterialSymbols
+                  name="mail"
+                  size={20}
+                  color={colors.textTertiary}
+                />
               }
             />
             <View style={[styles.field, { gap: spacing.xs }]}>
@@ -118,7 +144,11 @@ export default function SignUpScreen({ navigation }: IProps): JSX.Element {
                 value={password}
                 onChangeText={setPassword}
                 leftIcon={
-                  <MaterialSymbols name="lock" size={20} color={colors.textTertiary} />
+                  <MaterialSymbols
+                    name="lock"
+                    size={20}
+                    color={colors.textTertiary}
+                  />
                 }
                 rightIcon={
                   <MaterialSymbols
@@ -143,7 +173,11 @@ export default function SignUpScreen({ navigation }: IProps): JSX.Element {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               leftIcon={
-                <MaterialSymbols name="lock" size={20} color={colors.textTertiary} />
+                <MaterialSymbols
+                  name="lock"
+                  size={20}
+                  color={colors.textTertiary}
+                />
               }
               rightIcon={
                 <MaterialSymbols
@@ -164,7 +198,11 @@ export default function SignUpScreen({ navigation }: IProps): JSX.Element {
           </View>
 
           <View style={[styles.footer, { gap: spacing.xs }]}>
-            <Typography variant="bodyMd" color={colors.textSecondary} align="center">
+            <Typography
+              variant="bodyMd"
+              color={colors.textSecondary}
+              align="center"
+            >
               Already have an account?
             </Typography>
             <Typography

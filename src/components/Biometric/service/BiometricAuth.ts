@@ -1,6 +1,7 @@
 import ReactNativeBiometrics from 'react-native-biometrics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import CustomSnackbar from '../../../global/utils/snackbar.util';
+
+import { default as CustomSnackbar } from '../../../global/utils/nitro-toast.util';
 
 const rnBiometrics = new ReactNativeBiometrics();
 
@@ -13,21 +14,22 @@ class BiometricAuthService {
 
   static async isBiometricAvailable() {
     try {
-      const {available, biometryType} = await rnBiometrics.isSensorAvailable();
+      const { available, biometryType } =
+        await rnBiometrics.isSensorAvailable();
       return {
         available,
         biometryType,
       };
     } catch (error) {
       console.error('Error checking biometric availability:', error);
-      return {available: false, biometryType: null};
+      return { available: false, biometryType: null };
     }
   }
 
   static async setBiometricEnabled(enabled: boolean) {
     try {
       if (enabled) {
-        const {available} = await this.isBiometricAvailable();
+        const { available } = await this.isBiometricAvailable();
         if (!available) {
           CustomSnackbar.warning(
             'Biometric authentication is not available on this device.',
@@ -70,12 +72,12 @@ class BiometricAuthService {
     promptMessage = 'Please verify your identity',
   ) {
     try {
-      const {available} = await this.isBiometricAvailable();
+      const { available } = await this.isBiometricAvailable();
       if (!available) {
-        return {success: false, error: 'Biometric not available'};
+        return { success: false, error: 'Biometric not available' };
       }
 
-      const {success, error} = await rnBiometrics.simplePrompt({
+      const { success, error } = await rnBiometrics.simplePrompt({
         promptMessage,
         fallbackPromptMessage: 'Use Numeric Password',
       });
@@ -84,10 +86,10 @@ class BiometricAuthService {
         await this.setAuthenticationState(true);
       }
 
-      return {success, error};
+      return { success, error };
     } catch (error) {
       console.error('Biometric authentication error:', error);
-      return {success: false, error: (error as Error).message};
+      return { success: false, error: (error as Error).message };
     }
   }
 
@@ -220,7 +222,7 @@ class BiometricAuthService {
       const hasNumericPassword = await this.hasNumericPassword();
 
       if (!isBiometricEnabled && !hasNumericPassword) {
-        return {success: false, error: 'No authentication method configured'};
+        return { success: false, error: 'No authentication method configured' };
       }
 
       if (isBiometricEnabled) {
@@ -230,7 +232,7 @@ class BiometricAuthService {
         );
 
         if (biometricResult.success) {
-          return {success: true, method: 'biometric'};
+          return { success: true, method: 'biometric' };
         }
 
         if (hasNumericPassword) {
@@ -241,23 +243,27 @@ class BiometricAuthService {
           };
         }
 
-        return {success: false, error: biometricResult.error};
+        return { success: false, error: biometricResult.error };
       }
 
       if (hasNumericPassword) {
-        return {success: false, error: 'numeric_required', fallback: 'numeric'};
+        return {
+          success: false,
+          error: 'numeric_required',
+          fallback: 'numeric',
+        };
       }
 
-      return {success: false, error: 'No authentication method available'};
+      return { success: false, error: 'No authentication method available' };
     } catch (error) {
       console.error('Authentication error:', error);
-      return {success: false, error: (error as Error).message};
+      return { success: false, error: (error as Error).message };
     }
   }
 
   static async getBiometryType() {
     try {
-      const {biometryType} = await this.isBiometricAvailable();
+      const { biometryType } = await this.isBiometricAvailable();
       switch (biometryType) {
         case 'TouchID':
           return 'Touch ID';

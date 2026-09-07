@@ -3,10 +3,11 @@ import { Alert } from 'react-native';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
 import { AuthContext } from '../../../Auth/AuthContext';
-import { CustomSnackbar } from '../../../global/utils/snackbar.util';
+import { CustomSnackbar } from '../../../global/utils/nitro-toast.util';
+import type { IThemeMode } from '../../../context/theme-context.component';
 
 export function useAppSettings() {
-  const { isDark, setMode } = useTheme();
+  const { mode, setMode } = useTheme();
   const { signOut, user } = useContext(AuthContext);
 
   const handleLogout = useCallback(() => {
@@ -33,20 +34,26 @@ export function useAppSettings() {
   }, []);
 
   const handleAbout = useCallback(() => {
-    CustomSnackbar.info('About SecureVault', 'Version 1.0.0. Built with security in mind');
+    CustomSnackbar.info(
+      'About SecureVault',
+      'Version 1.0.0. Built with security in mind',
+    );
   }, []);
 
   const handleRateApp = useCallback(() => {
     CustomSnackbar.info('Rate Us', 'Thank you for using SecureVault!');
   }, []);
 
-  const toggleTheme = useCallback(() => {
-    setMode(isDark ? 'light' : 'dark');
-  }, [isDark, setMode]);
+  const handleModeChange = useCallback(
+    (newMode: IThemeMode) => {
+      setMode(newMode);
+    },
+    [setMode],
+  );
 
   return {
-    isDark,
-    toggleTheme,
+    mode,
+    handleModeChange,
     user,
     handleLogout,
     handleBackupSync,

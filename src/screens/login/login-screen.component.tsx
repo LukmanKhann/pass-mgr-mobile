@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
+import MaterialSymbols from '../../components/widgets/material-icon';
+
 import { useTheme } from '../../hooks/use-theme.hook';
 import { Button } from '../../components/controls/button';
 import { Input } from '../../components/controls/input';
 import { ScreenContainer } from '../../components/layouts/screen-container';
 import { Typography } from '../../components/widgets/typography';
-import MaterialSymbols from '../../components/widgets/material-icon';
 import { FIREBASE_AUTH } from '../../Firebase/firebase-config';
-import { CustomSnackbar } from '../../global/utils/snackbar.util';
+import { CustomSnackbar } from '../../global/utils/nitro-toast.util';
 import { MotionView } from '../../motion';
 
 interface IProps {
@@ -48,11 +49,24 @@ export default function LoginScreen({ navigation }: IProps): JSX.Element {
           transition={{ type: 'spring', spring: 'snappy', delay: 40 }}
           style={[styles.logoContainer, { gap: spacing.sm }]}
         >
-          <MaterialSymbols name="shield_lock" variant="filled" size={80} color={colors.accent} />
-          <Typography variant="headingXl" color={colors.textPrimary} align="center">
+          <MaterialSymbols
+            name="shield_lock"
+            variant="filled"
+            size={80}
+            color={colors.accent}
+          />
+          <Typography
+            variant="headingXl"
+            color={colors.textPrimary}
+            align="center"
+          >
             SecureVault
           </Typography>
-          <Typography variant="bodyMd" color={colors.textSecondary} align="center">
+          <Typography
+            variant="bodyMd"
+            color={colors.textSecondary}
+            align="center"
+          >
             Your passwords, protected
           </Typography>
         </MotionView>
@@ -71,7 +85,11 @@ export default function LoginScreen({ navigation }: IProps): JSX.Element {
             value={email}
             onChangeText={setEmail}
             leftIcon={
-              <MaterialSymbols name="mail" size={20} color={colors.textTertiary} />
+              <MaterialSymbols
+                name="mail"
+                size={20}
+                color={colors.textTertiary}
+              />
             }
           />
           <Input
@@ -82,7 +100,11 @@ export default function LoginScreen({ navigation }: IProps): JSX.Element {
             value={password}
             onChangeText={setPassword}
             leftIcon={
-              <MaterialSymbols name="lock" size={20} color={colors.textTertiary} />
+              <MaterialSymbols
+                name="lock"
+                size={20}
+                color={colors.textTertiary}
+              />
             }
             rightIcon={
               <MaterialSymbols
@@ -107,7 +129,11 @@ export default function LoginScreen({ navigation }: IProps): JSX.Element {
           transition={{ duration: 'fast', delay: 220 }}
           style={[styles.footer, { gap: spacing.xs }]}
         >
-          <Typography variant="bodyMd" color={colors.textSecondary} align="center">
+          <Typography
+            variant="bodyMd"
+            color={colors.textSecondary}
+            align="center"
+          >
             Don&apos;t have an account?
           </Typography>
           <Typography

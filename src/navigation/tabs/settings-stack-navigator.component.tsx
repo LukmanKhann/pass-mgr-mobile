@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import SettingsScreen from '../../screens/settings';
+import AppearanceScreen from '../../screens/settings/appearance.screen';
 
 import { useTheme } from '../../hooks/use-theme.hook';
 import { SCREENS } from '../navigation.constant';
@@ -20,6 +21,17 @@ export function SettingsStackNavigator(): JSX.Element {
         component={SettingsScreen}
         options={{
           title: 'Settings',
+          headerLargeTitle: false,
+          headerTitleAlign: 'center',
+          headerLargeTitleShadowVisible: false,
+          headerStyle: { backgroundColor: colors.background },
+        }}
+      />
+      <Stack.Screen
+        name={SCREENS.APPEARANCE as 'Appearance'}
+        component={AppearanceScreen}
+        options={{
+          title: 'Appearance',
           headerLargeTitle: false,
           headerTitleAlign: 'center',
           headerLargeTitleShadowVisible: false,

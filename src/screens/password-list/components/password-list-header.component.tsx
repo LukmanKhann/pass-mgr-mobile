@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
+  Animated,
   Platform,
   ScrollView,
   StyleSheet,
@@ -12,7 +13,12 @@ import MaterialSymbols from '../../../components/widgets/material-icon';
 import { Typography } from '../../../components/widgets/typography';
 import { useTheme } from '../../../hooks/use-theme.hook';
 import { CATEGORY_DOT_COLORS } from '../utils/password-list.util';
-import type { IPasswordListCategory, ISortOrder } from '../password-list.type';
+import { PASSWORD_CATEGORIES } from '../../../global/constants/password-categories.constant';
+import type { ISortOrder } from '../password-list.type';
+
+const IOS_PADDING_FOCUSED = 125;
+const IOS_PADDING_UNFOCUSED = 180;
+const ANIMATION_DURATION = 250;
 
 interface IProps {
   selectedCategory: string;
@@ -21,6 +27,7 @@ interface IProps {
   getPasswordsByCategory: (category: string) => Array<{ category?: string }>;
   sortOrder: ISortOrder;
   onSortChange: (order: ISortOrder) => void;
+  isSearchFocused: boolean;
 }
 
 export function PasswordListHeader({
@@ -30,51 +37,47 @@ export function PasswordListHeader({
   getPasswordsByCategory,
   sortOrder,
   onSortChange,
+  isSearchFocused,
 }: IProps): JSX.Element {
   const { colors, borderRadius, spacing } = useTheme();
+  const paddingAnim = useRef(
+    new Animated.Value(Platform.OS === 'ios' ? IOS_PADDING_UNFOCUSED : 8),
+  ).current;
 
-  const categories: IPasswordListCategory[] = [
-    { id: 'all', name: 'All', count: filteredPasswords.length },
-    {
-      id: 'social',
-      name: 'Social',
-      count: getPasswordsByCategory('social').length,
-    },
-    { id: 'work', name: 'Work', count: getPasswordsByCategory('work').length },
-    {
-      id: 'finance',
-      name: 'Finance',
-      count: getPasswordsByCategory('finance').length,
-    },
-    {
-      id: 'games',
-      name: 'Games',
-      count: getPasswordsByCategory('games').length,
-    },
-    {
-      id: 'personal',
-      name: 'Personal',
-      count: getPasswordsByCategory('personal').length,
-    },
-    {
-      id: 'shopping',
-      name: 'Shopping',
-      count: getPasswordsByCategory('shopping').length,
-    },
-    {
-      id: 'entertainment',
-      name: 'Entertainment',
-      count: getPasswordsByCategory('entertainment').length,
-    },
-    {
-      id: 'others',
-      name: 'Others',
-      count: getPasswordsByCategory('others').length,
-    },
-  ];
+  useEffect(() => {
+    const targetPadding =
+      Platform.OS === 'ios'
+        ? isSearchFocused
+          ? IOS_PADDING_FOCUSED
+          : IOS_PADDING_UNFOCUSED
+        : 8;
+
+    Animated.timing(paddingAnim, {
+      toValue: targetPadding,
+      duration: ANIMATION_DURATION,
+      useNativeDriver: false,
+    }).start();
+  }, [isSearchFocused, paddingAnim]);
+
+  const categories = PASSWORD_CATEGORIES.map(category => ({
+    ...category,
+    count:
+      category.id === 'all'
+        ? filteredPasswords.length
+        : getPasswordsByCategory(category.id).length,
+  }));
+
+  const getChipStyle = (active: boolean) => ({
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing.md,
+    gap: 6,
+    backgroundColor: active ? colors.accent : colors.surface,
+    borderColor: active ? undefined : colors.borderLight,
+    borderWidth: active ? 0 : 1,
+  });
 
   return (
-    <View style={styles.chipRow}>
+    <Animated.View style={[styles.chipRow, { paddingVertical: paddingAnim }]}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -104,7 +107,7 @@ export function PasswordListHeader({
             />
           )}
         </TouchableOpacity>
-        {categories.map((category: IPasswordListCategory) => {
+        {categories.map(category => {
           const active = selectedCategory === category.id;
           const dotColor = active
             ? colors.textOnAccent
@@ -121,21 +124,7 @@ export function PasswordListHeader({
               <TouchableOpacity
                 onPress={() => setSelectedCategory(category.id)}
                 activeOpacity={0.7}
-                style={[
-                  styles.chip,
-                  {
-                    borderRadius: borderRadius.full,
-                    paddingHorizontal: spacing.md,
-                    gap: 6,
-                  },
-                  active
-                    ? { backgroundColor: colors.accent }
-                    : {
-                        backgroundColor: colors.surface,
-                        borderColor: colors.borderLight,
-                        borderWidth: 1,
-                      },
-                ]}
+                style={[styles.chip, getChipStyle(active)]}
               >
                 <View style={[styles.dot, { backgroundColor: dotColor }]} />
                 <Typography
@@ -150,7 +139,7 @@ export function PasswordListHeader({
           );
         })}
       </ScrollView>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -158,7 +147,6 @@ const styles = StyleSheet.create({
   chipRow: {
     flexDirection: 'row',
     paddingBottom: 8,
-    paddingVertical: Platform.OS === 'ios' ? 180 : 8,
   },
   scrollContent: {
     flexDirection: 'row',

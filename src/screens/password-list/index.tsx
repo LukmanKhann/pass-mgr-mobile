@@ -44,6 +44,7 @@ export default function PasswordListScreen({ navigation }: Props): JSX.Element {
 
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortOrder, setSortOrder] = useState<ISortOrder>('none');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({
@@ -51,6 +52,8 @@ export default function PasswordListScreen({ navigation }: Props): JSX.Element {
         onChangeText: (e: { nativeEvent: { text: string } }) =>
           handleSearch(e.nativeEvent.text),
         onCancelButtonPress: () => handleSearch(''),
+        onFocus: () => setIsSearchFocused(true),
+        onBlur: () => setIsSearchFocused(false),
       },
     });
   }, [navigation, handleSearch]);
@@ -131,6 +134,7 @@ export default function PasswordListScreen({ navigation }: Props): JSX.Element {
         getPasswordsByCategory={getPasswordsByCategory}
         sortOrder={sortOrder}
         onSortChange={handleSortChange}
+        isSearchFocused={isSearchFocused}
       />
 
       <View style={styles.container}>

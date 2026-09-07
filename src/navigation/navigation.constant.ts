@@ -14,6 +14,7 @@ export const SCREENS = {
   GENERATOR: 'Generator',
   // Settings stack screens
   SETTINGS: 'Settings',
+  APPEARANCE: 'Appearance',
 } as const;
 
 export type IScreenName = (typeof SCREENS)[keyof typeof SCREENS];

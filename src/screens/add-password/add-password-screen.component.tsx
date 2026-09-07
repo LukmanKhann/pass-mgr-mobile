@@ -10,13 +10,14 @@ import {
   ViewStyle,
 } from 'react-native';
 
+import MaterialSymbols from '../../components/widgets/material-icon';
+import PasswordContext from '../../context/PasswordContext/password-context.component';
+
 import { useTheme } from '../../hooks/use-theme.hook';
 import { Button } from '../../components/controls/button';
 import { Input } from '../../components/controls/input';
 import { Typography } from '../../components/widgets/typography';
-import MaterialSymbols from '../../components/widgets/material-icon';
-import PasswordContext from '../../context/PasswordContext/password-context.component';
-import { CustomSnackbar } from '../../global/utils/snackbar.util';
+import { CustomSnackbar } from '../../global/utils/nitro-toast.util';
 import {
   CATEGORIES,
   CATEGORY_DOT_COLORS,
