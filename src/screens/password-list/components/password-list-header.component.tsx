@@ -1,5 +1,11 @@
 import React from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import MaterialSymbols from '../../../components/widgets/material-icon';
 
@@ -68,95 +74,107 @@ export function PasswordListHeader({
   ];
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={[styles.contentContainer, { gap: spacing.sm }]}
-    >
-      <TouchableOpacity
-        onPress={() => {
-          if (sortOrder === 'asc') onSortChange('desc');
-          else if (sortOrder === 'desc') onSortChange('none');
-          else onSortChange('asc');
-        }}
-        style={[
-          styles.sortButton,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.borderLight,
-            borderRadius: borderRadius.xl,
-            gap: spacing.xs,
-          },
-        ]}
-        activeOpacity={0.7}
+    <View style={styles.chipRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        <MaterialSymbols name="swap_vert" size={18} color={colors.accent} />
-        {sortOrder !== 'none' && (
-          <View style={[styles.sortDot, { backgroundColor: colors.success }]} />
-        )}
-      </TouchableOpacity>
-      {categories.map((category: IPasswordListCategory) => {
-        const active = selectedCategory === category.id;
-        const dotColor = active
-          ? colors.textOnAccent
-          : CATEGORY_DOT_COLORS[category.id] ?? colors.accent;
-
-        return (
-          <React.Fragment key={category.id}>
+        <TouchableOpacity
+          onPress={() => {
+            if (sortOrder === 'asc') onSortChange('desc');
+            else if (sortOrder === 'desc') onSortChange('none');
+            else onSortChange('asc');
+          }}
+          style={[
+            styles.chip,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.borderLight,
+              borderRadius: borderRadius.xl,
+              gap: spacing.xs,
+            },
+          ]}
+          activeOpacity={0.7}
+        >
+          <MaterialSymbols name="swap_vert" size={18} color={colors.accent} />
+          {sortOrder !== 'none' && (
             <View
-              style={[styles.divider, { backgroundColor: colors.borderLight }]}
+              style={[styles.sortDot, { backgroundColor: colors.success }]}
             />
-            <TouchableOpacity
-              onPress={() => setSelectedCategory(category.id)}
-              activeOpacity={0.7}
-              style={[
-                styles.chip,
-                {
-                  borderRadius: borderRadius.full,
-                  paddingHorizontal: spacing.md,
-                  gap: 6,
-                },
-                active
-                  ? { backgroundColor: colors.accent }
-                  : {
-                      backgroundColor: colors.surface,
-                      borderColor: colors.borderLight,
-                      borderWidth: 1,
-                    },
-              ]}
-            >
-              <View style={[styles.dot, { backgroundColor: dotColor }]} />
-              <Typography
-                variant="caption"
-                color={active ? colors.textOnAccent : colors.textSecondary}
-                fontWeight="600"
+          )}
+        </TouchableOpacity>
+        {categories.map((category: IPasswordListCategory) => {
+          const active = selectedCategory === category.id;
+          const dotColor = active
+            ? colors.textOnAccent
+            : CATEGORY_DOT_COLORS[category.id] ?? colors.accent;
+
+          return (
+            <React.Fragment key={category.id}>
+              <View
+                style={[
+                  styles.divider,
+                  { backgroundColor: colors.borderLight },
+                ]}
+              />
+              <TouchableOpacity
+                onPress={() => setSelectedCategory(category.id)}
+                activeOpacity={0.7}
+                style={[
+                  styles.chip,
+                  {
+                    borderRadius: borderRadius.full,
+                    paddingHorizontal: spacing.md,
+                    gap: 6,
+                  },
+                  active
+                    ? { backgroundColor: colors.accent }
+                    : {
+                        backgroundColor: colors.surface,
+                        borderColor: colors.borderLight,
+                        borderWidth: 1,
+                      },
+                ]}
               >
-                {category.name} {category.count}
-              </Typography>
-            </TouchableOpacity>
-          </React.Fragment>
-        );
-      })}
-    </ScrollView>
+                <View style={[styles.dot, { backgroundColor: dotColor }]} />
+                <Typography
+                  variant="caption"
+                  color={active ? colors.textOnAccent : colors.textSecondary}
+                  fontWeight="600"
+                >
+                  {category.name} {category.count}
+                </Typography>
+              </TouchableOpacity>
+            </React.Fragment>
+          );
+        })}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    paddingTop: 4,
-    zIndex: 10,
-    elevation: 10,
+  chipRow: {
+    flexDirection: 'row',
+    paddingBottom: 8,
+    paddingVertical: Platform.OS === 'ios' ? 180 : 8,
   },
-  contentContainer: {
-    paddingHorizontal: 16,
+  scrollContent: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingBottom: 12,
+    gap: 8,
+    paddingHorizontal: 16,
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 34,
+    justifyContent: 'center',
     paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    minHeight: 34,
   },
   dot: {
     width: 8,
@@ -167,14 +185,6 @@ const styles = StyleSheet.create({
     width: 1,
     height: 20,
     marginHorizontal: 4,
-  },
-  sortButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 36,
-    paddingHorizontal: 12,
-    borderWidth: 1,
   },
   sortDot: {
     width: 6,

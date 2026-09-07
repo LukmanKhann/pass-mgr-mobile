@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../hooks/use-theme.hook';
 import { EmptyState } from '../../components/widgets/empty-state';
@@ -19,7 +18,6 @@ type Props = NativeStackScreenProps<IVaultStackParamList, 'Vault'>;
 
 export default function PasswordListScreen({ navigation }: Props): JSX.Element {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const {
     filteredPasswords,
     loading,
@@ -125,64 +123,64 @@ export default function PasswordListScreen({ navigation }: Props): JSX.Element {
     );
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: colors.background, paddingTop: insets.top },
-      ]}
-    >
-      <FlatList
-        data={displayData}
-        renderItem={renderItem}
-        keyExtractor={(item: IPasswordItem) => item.id}
-        ListHeaderComponent={
-          <PasswordListHeader
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            filteredPasswords={filteredPasswords}
-            getPasswordsByCategory={getPasswordsByCategory}
-            sortOrder={sortOrder}
-            onSortChange={handleSortChange}
-          />
-        }
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.accent}
-            colors={[colors.accent]}
-          />
-        }
-        ListEmptyComponent={renderEmptyState()}
-        contentContainerStyle={
-          displayData.length === 0 ? styles.emptyList : styles.listContent
-        }
-        showsVerticalScrollIndicator={false}
-        removeClippedSubviews
-        maxToRenderPerBatch={10}
-        windowSize={10}
-        initialNumToRender={8}
-        contentInsetAdjustmentBehavior="automatic"
+    <>
+      <PasswordListHeader
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        filteredPasswords={filteredPasswords}
+        getPasswordsByCategory={getPasswordsByCategory}
+        sortOrder={sortOrder}
+        onSortChange={handleSortChange}
       />
 
-      <EditPasswordModal
-        visible={modalVisible}
-        onDismiss={closeModal}
-        onSave={handleSaveChanges}
-        title={title}
-        username={username}
-        password={password}
-        category={category}
-        passwordVisible={modalPasswordVisible}
-        onTogglePasswordVisibility={setModalPasswordVisible}
-        loading={loading}
-      />
-    </View>
+      <View style={styles.container}>
+        <FlatList
+          style={styles.list}
+          data={displayData}
+          renderItem={renderItem}
+          keyExtractor={(item: IPasswordItem) => item.id}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.accent}
+              colors={[colors.accent]}
+            />
+          }
+          ListEmptyComponent={renderEmptyState()}
+          contentContainerStyle={
+            displayData.length === 0 ? styles.emptyList : styles.listContent
+          }
+          showsVerticalScrollIndicator={false}
+          removeClippedSubviews
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          initialNumToRender={8}
+          contentInsetAdjustmentBehavior="automatic"
+        />
+
+        <EditPasswordModal
+          visible={modalVisible}
+          onDismiss={closeModal}
+          onSave={handleSaveChanges}
+          title={title}
+          username={username}
+          password={password}
+          category={category}
+          passwordVisible={modalPasswordVisible}
+          onTogglePasswordVisibility={setModalPasswordVisible}
+          loading={loading}
+        />
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  list: {
     flex: 1,
   },
   listContent: {

@@ -25,6 +25,7 @@ import {
   getPasswordStrengthLevel,
 } from './utils/password-generator.util';
 import { StrengthMeter } from '../../components/widgets/strength-meter';
+import { HeaderShadow } from '../../components/layouts/header-shadow';
 
 interface IOptionRowProps {
   label: string;
@@ -163,6 +164,7 @@ export default function PasswordGenerator(): JSX.Element {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <HeaderShadow />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           contentContainerStyle={[styles.scrollContent, { paddingBottom: 40 }]}
@@ -354,6 +356,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    paddingTop: 16,
     paddingBottom: 40,
   },
   card: {

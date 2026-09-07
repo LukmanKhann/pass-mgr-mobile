@@ -15,6 +15,7 @@ import { DataSection } from './components/data-section.component';
 import { SecuritySection } from './components/security-section.component';
 import { SupportSection } from './components/support-section.component';
 import { UserProfileHeader } from './components/user-profile-header.component';
+import { HeaderShadow } from '../../components/layouts/header-shadow';
 
 export default function SettingsScreen(): JSX.Element {
   const { colors, spacing } = useTheme();
@@ -43,6 +44,7 @@ export default function SettingsScreen(): JSX.Element {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <HeaderShadow />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

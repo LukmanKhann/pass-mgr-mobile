@@ -28,6 +28,7 @@ import {
 } from '../password-generator/utils/password-generator.util';
 import { SCREENS } from '../../navigation/shared/navigation.constant';
 import { StrengthMeter } from '../../components/widgets/strength-meter';
+import { HeaderShadow } from '../../components/layouts/header-shadow';
 
 interface IProps {
   navigation: { navigate: (screen: string) => void };
@@ -113,6 +114,7 @@ export default function AddPasswordScreen({ navigation }: IProps): JSX.Element {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <HeaderShadow />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           contentContainerStyle={[styles.scrollContent, { paddingBottom: 40 }]}
@@ -327,6 +329,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    paddingTop: 16,
     paddingBottom: 40,
   },
   card: {

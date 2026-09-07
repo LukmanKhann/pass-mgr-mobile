@@ -1,5 +1,4 @@
 import React from 'react';
-import { Platform } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import PasswordListScreen from '../../screens/password-list';
@@ -24,28 +23,17 @@ export function VaultStackNavigator(): JSX.Element {
           headerLargeTitle: false,
           headerTitleAlign: 'center',
           headerLargeTitleShadowVisible: false,
-          // ── Native search bar (replaces the custom JS TextInput SearchBar) ──
+          headerStyle: { backgroundColor: colors.background },
           headerSearchBarOptions: {
             placeholder: 'Search credentials',
             barTintColor: colors.surface,
             textColor: colors.textPrimary,
-            tintColor: colors.accent,
-            hintTextColor: colors.textTertiary,
-            headerIconColor: colors.accent,
-            // Keeps list visible while typing on iOS
+            tintColor: colors.surface,
+            hintTextColor: isDark ? colors.primary : '#000000',
+            headerIconColor: isDark ? colors.primary : '#000000',
             hideWhenScrolling: false,
             autoCapitalize: 'none',
           },
-          // Glass-blur header on iOS; plain surface on Android
-          ...Platform.select({
-            ios: {
-              headerTransparent: true,
-              headerBlurEffect: isDark ? 'dark' : 'light',
-            },
-            android: {
-              headerStyle: { backgroundColor: colors.background },
-            },
-          }),
         }}
       />
     </Stack.Navigator>
