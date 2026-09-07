@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
-import { Appearance, StatusBar, useColorScheme } from 'react-native';
+import { Appearance, Platform, StatusBar, useColorScheme } from 'react-native';
 
 import { typography } from '../theme/typography.theme';
 import { darkColors, IColorTokens, lightColors } from '../theme/colors.theme';
@@ -53,9 +53,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     AsyncStorage.getItem(THEME_KEY).then(stored => {
-      const resolved = (stored === 'light' || stored === 'dark' || stored === 'system')
-        ? stored as IThemeMode
-        : 'system';
+      const resolved =
+        stored === 'light' || stored === 'dark' || stored === 'system'
+          ? (stored as IThemeMode)
+          : 'system';
       setModeState(resolved);
       applyNativeColorScheme(resolved);
       setInitialized(true);
@@ -76,7 +77,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           setMode,
         }}
       >
-        <StatusBar barStyle={systemIsDark ? 'light-content' : 'dark-content'} />
+        <StatusBar
+          barStyle={systemIsDark ? 'light-content' : 'dark-content'}
+          backgroundColor="transparent"
+          translucent={Platform.OS === 'android'}
+        />
         {children}
       </ThemeContext.Provider>
     );
@@ -97,7 +102,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider value={value}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent={Platform.OS === 'android'}
+      />
       {children}
     </ThemeContext.Provider>
   );

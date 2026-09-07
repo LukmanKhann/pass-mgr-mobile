@@ -9,10 +9,10 @@ let currentColors: IColorTokens | null = null;
 function getBackgroundColor(type: string): string {
   if (!currentColors) return '#2E3440';
   const map: Record<string, string> = {
-    success: currentColors.surface,
-    error: currentColors.surface,
-    warning: currentColors.surface,
-    info: currentColors.surface,
+    success: currentColors.successLight ?? currentColors.surface,
+    error: currentColors.errorLight ?? currentColors.surface,
+    warning: currentColors.warningLight ?? currentColors.surface,
+    info: currentColors.infoLight ?? currentColors.surface,
     default: currentColors.surface,
     loading: currentColors.surface,
   };
@@ -53,6 +53,7 @@ export function nitroToast(
     title: title ?? '',
     duration,
     position,
+    useOverlay: false,
     backgroundColor: getBackgroundColor(type),
     messageColor: getTextColor(type),
     titleColor: getTextColor(type),
@@ -89,15 +90,20 @@ export function setToastColors(colors: IColorTokens): void {
 }
 
 export function ToastHost(): null {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   useEffect(() => {
     setToastColors(colors);
     configure({
       position: 'bottom',
+      presentation: 'stacked',
       haptics: false,
+      useOverlay: false,
+      backgroundColor: colors.surface,
+      messageColor: colors.textPrimary,
+      titleColor: colors.textPrimary,
     });
-  }, [colors]);
+  }, [colors, isDark]);
 
   return null;
 }
