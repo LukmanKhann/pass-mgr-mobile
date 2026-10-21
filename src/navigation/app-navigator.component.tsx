@@ -8,21 +8,25 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { useTheme } from '../hooks/use-theme.hook';
-import type { IColorTokens } from '../theme/colors.theme';
-import { AuthContext } from '../Auth/AuthContext';
+import NumericPasswordScreen from '../screens/numeric-password/numeric-password-screen.component';
+import AppearanceScreen from '../screens/settings/appearance.screen';
 import LoadingScreen from '../screens/loading/loading-screen.component';
 import LoginScreen from '../screens/login/login-screen.component';
 import SignUpScreen from '../screens/sign-up/sign-up-screen.component';
+
+import { useTheme } from '../hooks/use-theme.hook';
+import type { IColorTokens } from '../theme/colors.theme';
+import { AuthContext } from '../Auth/AuthContext';
 import { BottomTabNavigator } from './tabs/bottom-tab-navigator.component';
-import NumericPasswordScreen from '../screens/numeric-password/numeric-password-screen.component';
-import AppearanceScreen from '../screens/settings/appearance.screen';
 import { SCREENS } from './navigation.constant';
 import { createAuthScreenOptions } from './shared/navigation.util';
-import type { IAuthStackParamList } from './navigation.type';
+import type {
+  IAuthStackParamList,
+  IRootStackParamList,
+} from './navigation.type';
 
 const AuthStack = createNativeStackNavigator<IAuthStackParamList>();
-const RootStack = createNativeStackNavigator<any>();
+const RootStack = createNativeStackNavigator<IRootStackParamList>();
 
 const PERSISTENCE_KEY = 'NAVIGATION_STATE_V1';
 
@@ -85,11 +89,7 @@ function AppNavigatorInner(): JSX.Element {
           <RootStack.Screen
             name="NumericPassword"
             component={NumericPasswordScreen}
-            options={{
-              headerShown: true,
-              title: 'Numeric Password',
-              headerBackTitle: 'Back',
-            }}
+            options={{ headerShown: false }}
           />
           <RootStack.Screen
             name="Appearance"

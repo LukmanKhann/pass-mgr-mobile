@@ -11,7 +11,7 @@ import type { IVaultStackParamList } from '../navigation.type';
 const Stack = createNativeStackNavigator<IVaultStackParamList>();
 
 export function VaultStackNavigator(): JSX.Element {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
 
   return (
     <Stack.Navigator screenOptions={createDefaultScreenOptions(colors)}>
@@ -24,16 +24,6 @@ export function VaultStackNavigator(): JSX.Element {
           headerTitleAlign: 'center',
           headerLargeTitleShadowVisible: false,
           headerStyle: { backgroundColor: colors.background },
-          headerSearchBarOptions: {
-            placeholder: 'Search credentials',
-            barTintColor: colors.surface,
-            textColor: colors.textPrimary,
-            tintColor: colors.surface,
-            hintTextColor: isDark ? colors.primary : '#000000',
-            headerIconColor: isDark ? colors.primary : '#000000',
-            hideWhenScrolling: false,
-            autoCapitalize: 'none',
-          },
         }}
       />
     </Stack.Navigator>

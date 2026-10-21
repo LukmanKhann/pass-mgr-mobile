@@ -1,23 +1,31 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Keyboard, Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Animated,
+  Keyboard,
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import type { TextInputInstance } from 'react-native';
+
+import MaterialSymbols from '../../widgets/material-icon';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
 import { Typography } from '../../widgets/typography';
-import MaterialSymbols from '../../widgets/material-icon';
 import { NumericKeypad } from './numeric-keypad.component';
 import { PinCircles } from './pin-circles.component';
 
 interface IProps {
   visible: boolean;
   onClose: () => void;
-  onSuccess: (password: string) => boolean | void;
+  onSuccess: (password: string) => boolean | void | Promise<boolean | void>;
   onForgot?: () => void;
   title?: string;
   subtitle?: string;
   mode?: 'verify' | 'set';
   maxLength?: number;
- }
+}
 
 export default function NumericPasswordModal({
   visible,
@@ -47,6 +55,7 @@ export default function NumericPasswordModal({
     } else {
       hideModal();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const resetForm = () => {
@@ -58,8 +67,17 @@ export default function NumericPasswordModal({
 
   const showModal = () => {
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration:  200, useNativeDriver: true }),
-      Animated.spring(scaleAnim, { toValue: 1, tension:  150, friction:  7, useNativeDriver: true }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 150,
+        friction: 7,
+        useNativeDriver: true,
+      }),
     ]).start(() => {
       setTimeout(() => {
         passwordInputRef.current?.focus();
@@ -76,8 +94,12 @@ export default function NumericPasswordModal({
 
   const shakeError = useCallback(() => {
     const sequence = [10, -10, 8, -8, 0];
-    const animations = sequence.map((value: number, index: number) =>
-      Animated.timing(shakeAnimation, { toValue: value, duration: 60, useNativeDriver: true }),
+    const animations = sequence.map((value: number) =>
+      Animated.timing(shakeAnimation, {
+        toValue: value,
+        duration: 60,
+        useNativeDriver: true,
+      }),
     );
     Animated.sequence(animations).start();
   }, [shakeAnimation]);
@@ -106,8 +128,47 @@ export default function NumericPasswordModal({
     }
   };
 
-  const handlePasswordSubmit = (inputPassword: string = '', isConfirming: boolean = false) => {
-    const currentPassword = inputPassword || (isConfirming ? confirmPassword : password);
+  const resetAfterFailedVerify = useCallback(() => {
+    setTimeout(() => {
+      setPassword('');
+      setAttempts(prev => prev + 1);
+      shakeError();
+      setTimeout(() => {
+        passwordInputRef.current?.focus();
+      }, 500);
+    }, 100);
+  }, [shakeError]);
+
+  const handleVerifyResult = useCallback(
+    (result: boolean | void | Promise<boolean | void>) => {
+      if (result instanceof Promise) {
+        result
+          .then(success => {
+            if (success === false) {
+              resetAfterFailedVerify();
+            } else {
+              Keyboard.dismiss();
+            }
+          })
+          .catch(() => resetAfterFailedVerify());
+        return;
+      }
+
+      if (result === false) {
+        resetAfterFailedVerify();
+      } else {
+        Keyboard.dismiss();
+      }
+    },
+    [resetAfterFailedVerify],
+  );
+
+  const handlePasswordSubmit = (
+    inputPassword: string = '',
+    isConfirming: boolean = false,
+  ) => {
+    const currentPassword =
+      inputPassword || (isConfirming ? confirmPassword : password);
 
     if (currentPassword.length !== maxLength) {
       return;
@@ -128,19 +189,7 @@ export default function NumericPasswordModal({
         }, 500);
       }
     } else if (mode === 'verify') {
-      const result = onSuccess(currentPassword);
-      if (result === false) {
-        setTimeout(() => {
-          setPassword('');
-          setAttempts(prev => prev + 1);
-          shakeError();
-          setTimeout(() => {
-            passwordInputRef.current?.focus();
-          }, 500);
-        }, 100);
-      } else {
-        Keyboard.dismiss();
-      }
+      handleVerifyResult(onSuccess(currentPassword));
     } else if (mode === 'set' && !isConfirmMode) {
       setIsConfirmMode(true);
       setTimeout(() => {
@@ -170,18 +219,38 @@ export default function NumericPasswordModal({
     mode === 'set' && isConfirmMode ? 'Confirm Password' : title;
 
   const getCurrentSubtitle = (): string =>
-    mode === 'set' && isConfirmMode ? 'Re-enter your password to confirm' : subtitle;
+    mode === 'set' && isConfirmMode
+      ? 'Re-enter your password to confirm'
+      : subtitle;
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
       <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
-        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
+        <TouchableOpacity
+          style={styles.backdrop}
+          activeOpacity={1}
+          onPress={onClose}
+        />
         <Animated.View
           style={[
             styles.container,
             {
               opacity: fadeAnim,
-              transform: [{ translateY: fadeAnim.interpolate({ inputRange: [0, 1], outputRange: [300, 0] }) }, { translateX: shakeAnimation }],
+              transform: [
+                {
+                  translateY: fadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [300, 0],
+                  }),
+                },
+                { translateX: shakeAnimation },
+              ],
               backgroundColor: colors.surface,
               borderTopLeftRadius: borderRadius.xl,
               borderTopRightRadius: borderRadius.xl,
@@ -189,19 +258,46 @@ export default function NumericPasswordModal({
           ]}
         >
           <View style={styles.closeRow}>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton} activeOpacity={0.7}>
-              <MaterialSymbols name="close" size={24} color={colors.textPrimary} />
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeButton}
+              activeOpacity={0.7}
+            >
+              <MaterialSymbols
+                name="close"
+                size={24}
+                color={colors.textPrimary}
+              />
             </TouchableOpacity>
           </View>
           <View style={[styles.header, { gap: spacing.sm }]}>
-            <View style={[styles.headerIcon, { borderRadius: borderRadius.full, backgroundColor: colors.surfaceElevated }]}>
+            <View
+              style={[
+                styles.headerIcon,
+                {
+                  borderRadius: borderRadius.full,
+                  backgroundColor: colors.surfaceElevated,
+                },
+              ]}
+            >
               <MaterialSymbols name="lock" size={32} color={colors.accent} />
             </View>
-            <Typography variant="headingMd" color={colors.textPrimary}>{getCurrentTitle()}</Typography>
-            <Typography variant="bodyMd" color={colors.textSecondary} align="center">{getCurrentSubtitle()}</Typography>
+            <Typography variant="headingMd" color={colors.textPrimary}>
+              {getCurrentTitle()}
+            </Typography>
+            <Typography
+              variant="bodyMd"
+              color={colors.textSecondary}
+              align="center"
+            >
+              {getCurrentSubtitle()}
+            </Typography>
           </View>
 
-          <PinCircles length={getCurrentPassword().length} maxLength={maxLength} />
+          <PinCircles
+            length={getCurrentPassword().length}
+            maxLength={maxLength}
+          />
           <NumericKeypad
             value={getCurrentPassword()}
             onChangeText={handlePasswordChange}
@@ -213,12 +309,21 @@ export default function NumericPasswordModal({
 
           <View style={[styles.footer, { gap: spacing.sm }]}>
             {mode === 'verify' && onForgot ? (
-              <Typography variant="bodyMd" color={colors.warning} align="center" onPress={onForgot}>
+              <Typography
+                variant="bodyMd"
+                color={colors.warning}
+                align="center"
+                onPress={onForgot}
+              >
                 Forgot Password?
               </Typography>
             ) : null}
             {attempts > 0 ? (
-              <Typography variant="caption" color={colors.textTertiary} align="center">
+              <Typography
+                variant="caption"
+                color={colors.textTertiary}
+                align="center"
+              >
                 Attempts: {attempts}
               </Typography>
             ) : null}

@@ -9,7 +9,7 @@ export function useAppSettings() {
   const { mode, setMode } = useTheme();
   const { signOut, user } = useContext(AuthContext);
 
-  const handleLogout = useCallback(() => {}, [signOut]);
+  const handleLogout = useCallback(() => {}, []);
 
   const handleBackupSync = useCallback(() => {
     CustomSnackbar.info('Coming Soon', 'This feature will be available soon');

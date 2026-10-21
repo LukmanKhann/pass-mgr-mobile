@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 
 import BiometricAuthService from '../../../components/Biometric/service/BiometricAuth';
+import { DEFAULT_AUTO_LOCK_MINUTES } from '../../../components/Biometric/auto-lock.constants';
 
 import { CustomSnackbar } from '../../../global/utils/nitro-toast.util';
 
@@ -10,36 +11,54 @@ export function useSecuritySettings() {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometryType, setBiometryType] = useState('Biometric');
   const [hasNumericPassword, setHasNumericPassword] = useState(false);
-  const [autoLockEnabled, setAutoLockEnabled] = useState(true);
+  const [autoLockTimeout, setAutoLockTimeout] = useState(
+    DEFAULT_AUTO_LOCK_MINUTES,
+  );
   const [loading, setLoading] = useState(true);
 
-  const initializeSettings = useCallback(async () => {
+  const loadSecurityState = useCallback(async (showLoading: boolean) => {
     try {
-      setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
       const [
         biometricEnabledStatus,
         biometricAvailability,
         biometryTypeResult,
         numericPasswordStatus,
-        autoLockStatus,
+        autoLockTimeoutStatus,
       ] = await Promise.all([
         BiometricAuthService.isBiometricEnabled(),
         BiometricAuthService.isBiometricAvailable(),
         BiometricAuthService.getBiometryType(),
         BiometricAuthService.hasNumericPassword(),
-        BiometricAuthService.isAutoLockEnabled(),
+        BiometricAuthService.getAutoLockTimeout(),
       ]);
       setBiometricEnabled(biometricEnabledStatus);
       setBiometricAvailable(biometricAvailability.available);
       setBiometryType(biometryTypeResult);
       setHasNumericPassword(numericPasswordStatus);
-      setAutoLockEnabled(autoLockStatus);
-    } catch (error) {
-      CustomSnackbar.error('Failed to load security settings.');
+      setAutoLockTimeout(autoLockTimeoutStatus);
+    } catch {
+      if (showLoading) {
+        CustomSnackbar.error('Failed to load security settings.');
+      }
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   }, []);
+
+  const initializeSettings = useCallback(
+    () => loadSecurityState(true),
+    [loadSecurityState],
+  );
+
+  const refreshSettings = useCallback(
+    () => loadSecurityState(false),
+    [loadSecurityState],
+  );
 
   useEffect(() => {
     initializeSettings();
@@ -81,7 +100,7 @@ export function useSecuritySettings() {
           return true;
         }
         return false;
-      } catch (error) {
+      } catch {
         if (!suppressSnackbar) {
           CustomSnackbar.error('Failed to update biometric settings.');
         }
@@ -91,15 +110,17 @@ export function useSecuritySettings() {
     [hasNumericPassword, biometricAvailable, biometryType],
   );
 
-  const handleAutoLockToggle = useCallback(async (enabled: boolean) => {
+  const handleAutoLockChange = useCallback(async (minutes: number) => {
     try {
-      const success = await BiometricAuthService.setAutoLockEnabled(enabled);
+      const success = await BiometricAuthService.setAutoLockTimeout(minutes);
       if (success) {
-        setAutoLockEnabled(enabled);
+        setAutoLockTimeout(minutes);
+        CustomSnackbar.success('Auto-lock setting updated.');
         return true;
       }
+      CustomSnackbar.error('Failed to update auto-lock settings.');
       return false;
-    } catch (error) {
+    } catch {
       CustomSnackbar.error('Failed to update auto-lock settings.');
       return false;
     }
@@ -123,11 +144,12 @@ export function useSecuritySettings() {
     biometricAvailable,
     biometryType,
     hasNumericPassword,
-    autoLockEnabled,
+    autoLockTimeout,
     loading,
     handleBiometricToggle,
-    handleAutoLockToggle,
+    handleAutoLockChange,
     initializeSettings,
+    refreshSettings,
     getAuthenticationStatus,
     canEnableBiometric,
     setHasNumericPassword,

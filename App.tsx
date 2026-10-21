@@ -1,4 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { AppState } from 'react-native';
 import {
   MD3DarkTheme,
@@ -21,12 +27,13 @@ import { ToastHost } from './src/global/utils/nitro-toast.util';
 import type { IColorTokens } from './src/theme/colors.theme';
 
 function AppContent(): JSX.Element {
-  const { user, loading } = useContext(AuthContext);
+  const { user, loading, signOut } = useContext(AuthContext);
   const [isBiometricAuthenticated, setIsBiometricAuthenticated] =
     useState(false);
   const [needsBiometricAuth, setNeedsBiometricAuth] = useState(false);
   const [checkingBiometric, setCheckingBiometric] = useState(true);
   const [minimumLoading, setMinimumLoading] = useState(true);
+  const backgroundedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -35,28 +42,7 @@ function AppContent(): JSX.Element {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (!loading) {
-      checkBiometricAuthState();
-    }
-  }, [user, loading]);
-
-  useEffect(() => {
-    let lastState: string = AppState.currentState ?? 'active';
-    const handleAppStateChange = async (nextAppState: string) => {
-      if (lastState.match(/inactive|background/) && nextAppState === 'active') {
-        // App is returning from background, do NOT reset biometric unless app was killed
-      }
-      lastState = nextAppState;
-    };
-    const subscription = AppState.addEventListener(
-      'change',
-      handleAppStateChange,
-    );
-    return () => subscription.remove();
-  }, []);
-
-  const checkBiometricAuthState = async (): Promise<void> => {
+  const checkBiometricAuthState = useCallback(async (): Promise<void> => {
     try {
       setCheckingBiometric(true);
 
@@ -77,11 +63,77 @@ function AppContent(): JSX.Element {
         setIsBiometricAuthenticated(false);
         setNeedsBiometricAuth(false);
       }
-    } catch (error) {
+    } catch {
       setIsBiometricAuthenticated(false);
       setNeedsBiometricAuth(false);
     } finally {
       setCheckingBiometric(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!loading) {
+      checkBiometricAuthState();
+    }
+  }, [loading, checkBiometricAuthState]);
+
+  useEffect(() => {
+    const lockApp = async (): Promise<void> => {
+      const hasLockMethod = await BiometricAuthService.hasLockMethod();
+      if (!hasLockMethod) {
+        return;
+      }
+      await BiometricAuthService.setAuthenticationState(false);
+      setIsBiometricAuthenticated(false);
+      setNeedsBiometricAuth(true);
+    };
+
+    const handleAppStateChange = async (nextState: string): Promise<void> => {
+      if (nextState === 'background') {
+        if (backgroundedAtRef.current !== null) {
+          return;
+        }
+
+        backgroundedAtRef.current = Date.now();
+        const timeoutMinutes = await BiometricAuthService.getAutoLockTimeout();
+        if (timeoutMinutes === 0) {
+          await lockApp();
+        }
+        return;
+      }
+
+      if (nextState !== 'active') {
+        return;
+      }
+
+      const backgroundedAt = backgroundedAtRef.current;
+      if (backgroundedAt === null) {
+        return;
+      }
+      backgroundedAtRef.current = null;
+
+      const timeoutMinutes = await BiometricAuthService.getAutoLockTimeout();
+      const elapsedMs = Date.now() - backgroundedAt;
+
+      if (timeoutMinutes === 0 || elapsedMs >= timeoutMinutes * 60 * 1000) {
+        await lockApp();
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+    return () => subscription.remove();
+  }, []);
+
+  const handleForgotPin = async (): Promise<void> => {
+    try {
+      await BiometricAuthService.setNumericPassword('');
+      await BiometricAuthService.setBiometricEnabled(false);
+      await BiometricAuthService.setAuthenticationState(false);
+    } finally {
+      await signOut();
     }
   };
 
@@ -104,6 +156,7 @@ function AppContent(): JSX.Element {
       <AuthLockScreen
         onAuthenticated={handleBiometricAuthenticated}
         onSetupRequired={handleBiometricSetupRequired}
+        onForgotPin={handleForgotPin}
       />
     );
   }

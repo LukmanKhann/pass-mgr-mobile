@@ -3,6 +3,7 @@ import { Modal, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
 import { Button } from '../../controls/button';
+import type { IButtonVariant } from '../../controls/button/button.type';
 import { Typography } from '../typography';
 
 interface IProps {
@@ -13,6 +14,7 @@ interface IProps {
   onConfirm?: () => void;
   confirmTitle?: string;
   cancelTitle?: string;
+  confirmVariant?: IButtonVariant;
 }
 
 export function AppModal({
@@ -23,11 +25,17 @@ export function AppModal({
   onConfirm,
   confirmTitle = 'Confirm',
   cancelTitle = 'Close',
+  confirmVariant = 'primary',
 }: IProps): JSX.Element {
   const { colors, spacing, borderRadius } = useTheme();
 
   return (
-    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
         <View
           style={[
@@ -40,20 +48,40 @@ export function AppModal({
           ]}
         >
           {title ? (
-            <Typography variant="headingMd" color={colors.textPrimary} align="center" style={styles.title}>
+            <Typography
+              variant="headingMd"
+              color={colors.textPrimary}
+              align="center"
+              style={styles.title}
+            >
               {title}
             </Typography>
           ) : null}
           {message ? (
-            <Typography variant="bodyMd" color={colors.textSecondary} align="center" style={styles.message}>
+            <Typography
+              variant="bodyMd"
+              color={colors.textSecondary}
+              align="center"
+              style={styles.message}
+            >
               {message}
             </Typography>
           ) : null}
           <View style={styles.buttonRow}>
             {onConfirm ? (
-              <Button title={confirmTitle} onPress={onConfirm} variant="primary" style={styles.button} />
+              <Button
+                title={confirmTitle}
+                onPress={onConfirm}
+                variant={confirmVariant}
+                style={styles.button}
+              />
             ) : null}
-            <Button title={cancelTitle} onPress={onClose} variant="outline" style={styles.button} />
+            <Button
+              title={cancelTitle}
+              onPress={onClose}
+              variant="outline"
+              style={styles.button}
+            />
           </View>
         </View>
       </View>

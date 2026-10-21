@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Animated,
   AppState,
@@ -19,41 +19,60 @@ import { CustomSnackbar } from '../../../global/utils/nitro-toast.util';
 interface IProps {
   onAuthenticated: () => void;
   onSetupRequired: () => void;
+  onForgotPin: () => Promise<void> | void;
 }
 
 export default function AuthLockScreen({
   onAuthenticated,
   onSetupRequired,
+  onForgotPin,
 }: IProps): JSX.Element {
   const { colors, spacing, borderRadius } = useTheme();
   const [showNumericModal, setShowNumericModal] = useState(false);
-  const [biometryType, setBiometryType] = useState('Biometric');
+  const [showForgotModal, setShowForgotModal] = useState(false);
   const [authMethods, setAuthMethods] = useState({
     biometric: false,
     numeric: false,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [attempts, setAttempts] = useState(0);
-  const [hasAttemptedBiometric, setHasAttemptedBiometric] = useState(false);
-  const [showBiometricCancelled, setShowBiometricCancelled] = useState(false);
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [modalConfig, setModalConfig] = useState({
     title: '',
     message: '',
     onConfirm: null as (() => void) | null,
   });
-  const fadeAnim = new Animated.Value(0);
-  const shakeAnim = new Animated.Value(0);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const hasAttemptedBiometricRef = useRef(false);
+  const wasBackgroundedRef = useRef(false);
+  const promptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const biometricInFlightRef = useRef(false);
+  const pendingBiometricPromptRef = useRef(false);
 
   useEffect(() => {
     initializeAuth();
 
     const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'background') {
+        wasBackgroundedRef.current = true;
+        if (promptTimeoutRef.current) {
+          clearTimeout(promptTimeoutRef.current);
+          promptTimeoutRef.current = null;
+        }
+        return;
+      }
+
       if (nextAppState === 'active') {
-        setAttempts(0);
-        setHasAttemptedBiometric(false);
-        setShowBiometricCancelled(false);
-        initializeAuth();
+        const shouldRetry =
+          wasBackgroundedRef.current || pendingBiometricPromptRef.current;
+        wasBackgroundedRef.current = false;
+        pendingBiometricPromptRef.current = false;
+
+        if (shouldRetry) {
+          setAttempts(0);
+          hasAttemptedBiometricRef.current = false;
+          initializeAuth();
+        }
       }
     };
 
@@ -64,7 +83,12 @@ export default function AuthLockScreen({
 
     return () => {
       subscription?.remove();
+      if (promptTimeoutRef.current) {
+        clearTimeout(promptTimeoutRef.current);
+        promptTimeoutRef.current = null;
+      }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -73,74 +97,57 @@ export default function AuthLockScreen({
       duration: 1000,
       useNativeDriver: true,
     }).start();
-  }, []);
+  }, [fadeAnim]);
 
   const initializeAuth = async () => {
     setIsLoading(true);
     try {
-      const [biometricEnabled, hasNumericPassword, biometryTypeResult] =
-        await Promise.all([
-          BiometricAuthService.isBiometricEnabled(),
-          BiometricAuthService.hasNumericPassword(),
-          BiometricAuthService.getBiometryType(),
-        ]);
+      const [biometricEnabled, hasNumericPassword] = await Promise.all([
+        BiometricAuthService.isBiometricEnabled(),
+        BiometricAuthService.hasNumericPassword(),
+      ]);
 
       setAuthMethods({
         biometric: biometricEnabled,
         numeric: hasNumericPassword,
       });
-      setBiometryType(biometryTypeResult);
 
       if (!biometricEnabled && !hasNumericPassword) {
         onSetupRequired?.();
         return;
       }
 
-      if (biometricEnabled && !hasAttemptedBiometric) {
-        setHasAttemptedBiometric(true);
-        setTimeout(() => {
-          handleBiometricAuth();
+      if (!biometricEnabled && hasNumericPassword) {
+        setShowNumericModal(true);
+        return;
+      }
+
+      if (biometricEnabled && !hasAttemptedBiometricRef.current) {
+        hasAttemptedBiometricRef.current = true;
+        if (promptTimeoutRef.current) {
+          clearTimeout(promptTimeoutRef.current);
+        }
+        promptTimeoutRef.current = setTimeout(() => {
+          promptTimeoutRef.current = null;
+          if (AppState.currentState === 'active') {
+            handleBiometricAuth();
+          } else {
+            pendingBiometricPromptRef.current = true;
+          }
         }, 500);
       }
-    } catch (error) {
+    } catch {
       // no-op
     } finally {
       setIsLoading(false);
     }
   };
 
-  const shakeAnimation = () => {
-    Animated.sequence([
-      Animated.timing(shakeAnim, {
-        toValue: 10,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(shakeAnim, {
-        toValue: -10,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(shakeAnim, {
-        toValue: 10,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(shakeAnim, {
-        toValue: 0,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const handleBiometricAuth = async (
-    isCancelled: boolean = false,
-  ): Promise<void> => {
-    if (isCancelled) {
-      setShowBiometricCancelled(true);
+  const handleBiometricAuth = async (): Promise<void> => {
+    if (biometricInFlightRef.current) {
       return;
     }
+    biometricInFlightRef.current = true;
 
     try {
       const result = await BiometricAuthService.authenticateWithBiometric(
@@ -149,21 +156,16 @@ export default function AuthLockScreen({
       );
 
       if (result.success) {
-        setShowBiometricCancelled(false);
         setTimeout(() => {
           onAuthenticated();
         }, 200);
-      } else {
+      } else if (!result.cancelled) {
         setAttempts(prev => prev + 1);
-        if (authMethods.numeric) {
-          setShowBiometricCancelled(true);
-        }
       }
-    } catch (error) {
+    } catch {
       setAttempts(prev => prev + 1);
-      if (authMethods.numeric) {
-        setShowBiometricCancelled(true);
-      }
+    } finally {
+      biometricInFlightRef.current = false;
     }
   };
 
@@ -176,56 +178,52 @@ export default function AuthLockScreen({
       if (isValid) {
         setShowNumericModal(false);
         setAttempts(0);
-        setShowBiometricCancelled(false);
         setTimeout(() => {
           onAuthenticated();
         }, 200);
         return true;
-      } else {
-        setAttempts(prev => prev + 1);
-
-        if (attempts >= 4) {
-          setModalConfig({
-            title: 'Too Many Attempts',
-            message: 'Please try again later or contact support.',
-            onConfirm: () => setShowCustomModal(false),
-          });
-          setShowCustomModal(true);
-        } else {
-          CustomSnackbar.error(
-            `Invalid password. ${5 - attempts - 1} attempts remaining.`,
-          );
-        }
-        return false;
       }
-    } catch (error) {
+
+      const nextAttempts = attempts + 1;
+      setAttempts(nextAttempts);
+
+      if (nextAttempts >= 5) {
+        setModalConfig({
+          title: 'Too Many Attempts',
+          message:
+            'Too many incorrect attempts. Please wait a moment and try again.',
+          onConfirm: () => setShowCustomModal(false),
+        });
+        setShowCustomModal(true);
+        setShowNumericModal(false);
+      } else {
+        const remaining = 5 - nextAttempts;
+        CustomSnackbar.error(
+          `Invalid PIN. ${remaining} attempt${
+            remaining === 1 ? '' : 's'
+          } remaining.`,
+        );
+      }
+      return false;
+    } catch {
       CustomSnackbar.error('Authentication failed. Please try again.');
       return false;
     }
   };
 
   const handleUseNumeric = () => {
-    setShowBiometricCancelled(false);
     setShowNumericModal(true);
   };
 
-  const handleRetryBiometric = () => {
-    setShowBiometricCancelled(false);
-    handleBiometricAuth();
+  const handleForgotRequest = () => {
+    setShowNumericModal(false);
+    setShowForgotModal(true);
   };
 
-  const handleForgotPassword = () => {
-    setTimeout(async () => {
-      try {
-        await BiometricAuthService.setBiometricEnabled(false);
-        await BiometricAuthService.setNumericPassword('');
-        setTimeout(() => {
-          onSetupRequired?.();
-        }, 1000);
-      } catch (error) {
-        // no-op
-      }
-    }, 2000);
+  const handleForgotConfirm = () => {
+    setShowForgotModal(false);
+    setShowNumericModal(false);
+    onForgotPin();
   };
 
   if (isLoading) {
@@ -285,10 +283,31 @@ export default function AuthLockScreen({
         >
           Unlock your vault to access your passwords
         </Typography>
-        {authMethods.numeric && !showBiometricCancelled && (
+        {authMethods.biometric && (
+          <TouchableOpacity
+            style={[
+              styles.biometricButton,
+              {
+                backgroundColor: colors.accent,
+                borderRadius: borderRadius.md,
+              },
+            ]}
+            onPress={handleBiometricAuth}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Unlock with biometrics"
+          >
+            <Typography variant="buttonMd" color={colors.textOnAccent}>
+              Unlock with Biometrics
+            </Typography>
+          </TouchableOpacity>
+        )}
+        {authMethods.numeric && (
           <View style={[styles.helpContainer, { padding: spacing.md }]}>
             <Typography variant="bodyMd" color={colors.textSecondary}>
-              Having trouble with biometric authentication?
+              {authMethods.biometric
+                ? 'Having trouble with biometric authentication?'
+                : 'Use your PIN to unlock your vault'}
             </Typography>
             <TouchableOpacity
               style={[
@@ -301,7 +320,7 @@ export default function AuthLockScreen({
               onPress={handleUseNumeric}
             >
               <Typography variant="buttonMd" color={colors.textOnAccent}>
-                Use Numeric Password
+                {authMethods.biometric ? 'Use Numeric Password' : 'Enter PIN'}
               </Typography>
             </TouchableOpacity>
           </View>
@@ -310,11 +329,21 @@ export default function AuthLockScreen({
       <NumericPasswordModal
         visible={showNumericModal}
         onClose={() => setShowNumericModal(false)}
-        onSuccess={(password: string) => void handleNumericAuth(password)}
-        onForgot={handleForgotPassword}
+        onSuccess={handleNumericAuth}
+        onForgot={handleForgotRequest}
         title="Enter Password"
         subtitle="Enter your 4-digit password to unlock"
         mode="verify"
+      />
+      <AppModal
+        visible={showForgotModal}
+        title="Forgot your PIN?"
+        message="To protect your vault, you'll be signed out. Sign in with your account and set a new PIN."
+        confirmTitle="Sign out"
+        cancelTitle="Cancel"
+        confirmVariant="danger"
+        onClose={() => setShowForgotModal(false)}
+        onConfirm={handleForgotConfirm}
       />
       <AppModal
         visible={showCustomModal}
@@ -367,5 +396,10 @@ const styles = StyleSheet.create({
   helpButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
+  },
+  biometricButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginTop: 12,
   },
 });

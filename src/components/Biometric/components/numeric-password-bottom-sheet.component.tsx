@@ -1,10 +1,17 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { BottomSheetModal, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
+import MaterialSymbols from '../../widgets/material-icon';
+
 import { useTheme } from '../../../hooks/use-theme.hook';
 import { Typography } from '../../widgets/typography';
-import MaterialSymbols from '../../widgets/material-icon';
 import { NumericKeypad } from './numeric-keypad.component';
 import { PinCircles } from './pin-circles.component';
 
@@ -61,49 +68,53 @@ export default function NumericPasswordBottomSheet({
       if (numericText.length <= maxLength) {
         setConfirmPassword(numericText);
         if (numericText.length === maxLength) {
-          setTimeout(() => handlePasswordSubmit(numericText, true), 100);
+          setTimeout(() => handlePasswordSubmit(numericText), 100);
         }
       }
     } else {
       if (numericText.length <= maxLength) {
         setPassword(numericText);
         if (numericText.length === maxLength) {
-          setTimeout(() => handlePasswordSubmit(numericText, false), 100);
+          setTimeout(() => handlePasswordSubmit(numericText), 100);
         }
       }
     }
   };
 
-  const handlePasswordSubmit = (inputPassword: string = '', isConfirm: boolean = false) => {
+  const handlePasswordSubmit = (inputPassword: string = ''): boolean => {
+    const candidate =
+      inputPassword || (isConfirmMode ? confirmPassword : password);
+
+    if (candidate.length !== maxLength) {
+      return false;
+    }
+
     if (mode === 'set') {
-      if (!isConfirmMode && inputPassword.length === maxLength) {
+      if (!isConfirmMode) {
         setIsConfirmMode(true);
-        setPassword('');
         return true;
       }
-      if (isConfirmMode && confirmPassword.length === maxLength) {
-        if (password === confirmPassword) {
-          const result = onSuccess(password);
-          if (result === true || result === undefined) {
-            onClose();
-          }
-          return true;
-        } else {
-          setConfirmPassword('');
-          setPassword('');
-          setIsConfirmMode(false);
-          setAttempts(a => a + 1);
-          return false;
+
+      if (candidate === password) {
+        const result = onSuccess(password);
+        if (result === true || result === undefined) {
+          onClose();
         }
+        return true;
       }
-    } else {
-      const result = onSuccess(inputPassword);
-      if (result === true || result === undefined) {
-        onClose();
-      }
-      return true;
+
+      setConfirmPassword('');
+      setPassword('');
+      setIsConfirmMode(false);
+      setAttempts(a => a + 1);
+      return false;
     }
-    return false;
+
+    const result = onSuccess(candidate);
+    if (result === true || result === undefined) {
+      onClose();
+    }
+    return true;
   };
 
   const handleBackspace = () => {
@@ -121,12 +132,24 @@ export default function NumericPasswordBottomSheet({
     }
   };
 
-  const getCurrentPassword = () => (mode === 'set' && isConfirmMode ? confirmPassword : password);
-  const getCurrentTitle = () => (mode === 'set' && isConfirmMode ? 'Confirm Password' : title);
-  const getCurrentSubtitle = () => (mode === 'set' && isConfirmMode ? 'Re-enter your password to confirm' : subtitle);
+  const getCurrentPassword = () =>
+    mode === 'set' && isConfirmMode ? confirmPassword : password;
+  const getCurrentTitle = () =>
+    mode === 'set' && isConfirmMode ? 'Confirm Password' : title;
+  const getCurrentSubtitle = () =>
+    mode === 'set' && isConfirmMode
+      ? 'Re-enter your password to confirm'
+      : subtitle;
 
   const renderBackdrop = useCallback(
-    (props: any) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} pressBehavior="close" />,
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        pressBehavior="close"
+      />
+    ),
     [],
   );
 
@@ -140,25 +163,67 @@ export default function NumericPasswordBottomSheet({
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
       onDismiss={onClose}
-      handleIndicatorStyle={{ backgroundColor: colors.textTertiary, width: 40, height: 4 }}
+      handleIndicatorStyle={{
+        backgroundColor: colors.textTertiary,
+        width: 40,
+        height: 4,
+      }}
       backgroundStyle={{ backgroundColor: colors.surface }}
     >
-      <View style={[styles.container, { paddingHorizontal: spacing.xl, paddingBottom: spacing.lg, paddingTop: spacing.sm }]}>
+      <View
+        style={[
+          styles.container,
+          {
+            paddingHorizontal: spacing.xl,
+            paddingBottom: spacing.lg,
+            paddingTop: spacing.sm,
+          },
+        ]}
+      >
         <View style={styles.closeRow}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton} activeOpacity={0.7}>
-            <MaterialSymbols name="close" size={24} color={colors.textPrimary} />
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.closeButton}
+            activeOpacity={0.7}
+          >
+            <MaterialSymbols
+              name="close"
+              size={24}
+              color={colors.textPrimary}
+            />
           </TouchableOpacity>
         </View>
 
-        <View style={[styles.header, { gap: spacing.sm, marginTop: spacing.sm }]}>
-          <View style={[styles.headerIcon, { borderRadius: borderRadius.full, backgroundColor: colors.surfaceElevated }]}>
+        <View
+          style={[styles.header, { gap: spacing.sm, marginTop: spacing.sm }]}
+        >
+          <View
+            style={[
+              styles.headerIcon,
+              {
+                borderRadius: borderRadius.full,
+                backgroundColor: colors.surfaceElevated,
+              },
+            ]}
+          >
             <MaterialSymbols name="lock" size={32} color={colors.accent} />
           </View>
-          <Typography variant="headingMd" color={colors.textPrimary}>{getCurrentTitle()}</Typography>
-          <Typography variant="bodyMd" color={colors.textSecondary} align="center">{getCurrentSubtitle()}</Typography>
+          <Typography variant="headingMd" color={colors.textPrimary}>
+            {getCurrentTitle()}
+          </Typography>
+          <Typography
+            variant="bodyMd"
+            color={colors.textSecondary}
+            align="center"
+          >
+            {getCurrentSubtitle()}
+          </Typography>
         </View>
 
-        <PinCircles length={getCurrentPassword().length} maxLength={maxLength} />
+        <PinCircles
+          length={getCurrentPassword().length}
+          maxLength={maxLength}
+        />
         <NumericKeypad
           value={getCurrentPassword()}
           onChangeText={handlePasswordChange}
@@ -168,14 +233,25 @@ export default function NumericPasswordBottomSheet({
           inputRef={passwordInputRef}
         />
 
-        <View style={[styles.footer, { gap: spacing.sm, marginTop: spacing.sm }]}>
+        <View
+          style={[styles.footer, { gap: spacing.sm, marginTop: spacing.sm }]}
+        >
           {mode === 'verify' && onForgot ? (
-            <Typography variant="bodyMd" color={colors.warning} align="center" onPress={onForgot}>
+            <Typography
+              variant="bodyMd"
+              color={colors.warning}
+              align="center"
+              onPress={onForgot}
+            >
               Forgot Password?
             </Typography>
           ) : null}
           {attempts > 0 ? (
-            <Typography variant="caption" color={colors.textTertiary} align="center">
+            <Typography
+              variant="caption"
+              color={colors.textTertiary}
+              align="center"
+            >
               Attempts: {attempts}
             </Typography>
           ) : null}

@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import MaterialSymbols from '../../components/widgets/material-icon';
@@ -8,9 +9,9 @@ import { useTheme } from '../../hooks/use-theme.hook';
 import { Button } from '../../components/controls/button';
 import { Typography } from '../../components/widgets/typography';
 import { useAppSettings } from './hooks/use-app-settings.hook';
-import { usePasswordSettings } from './hooks/use-password-settings.hook';
 import { useSecuritySettings } from './hooks/use-security-settings.hook';
 import { AppearanceSection } from './components/appearance-section.component';
+import { AutoLockModal } from './components/auto-lock-modal.component';
 import { DataSection } from './components/data-section.component';
 import { SecuritySection } from './components/security-section.component';
 import { SupportSection } from './components/support-section.component';
@@ -37,19 +38,13 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
   };
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showAutoLockModal, setShowAutoLockModal] = useState(false);
 
   const appSettings = useAppSettings();
   const securitySettings = useSecuritySettings();
-  const passwordSettings = usePasswordSettings({
-    hasNumericPassword: securitySettings.hasNumericPassword,
-    setHasNumericPassword: securitySettings.setHasNumericPassword,
-    setBiometricEnabled: securitySettings.handleBiometricToggle,
-    biometricEnabled: securitySettings.biometricEnabled,
-  });
 
   const passwordUI = useMemo(
     () => ({
-      ...passwordSettings,
       handleSetNumericPassword: () => {
         navigation.navigate('NumericPassword', {
           mode: 'set',
@@ -61,9 +56,31 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
             : 'Create a 4-digit password to unlock your vault',
         });
       },
-      handleRemoveNumericPassword: passwordSettings.handleRemoveNumericPassword,
+      handleRemoveNumericPassword: () => {
+        navigation.navigate('NumericPassword', { mode: 'remove' });
+      },
     }),
-    [navigation, passwordSettings, securitySettings.hasNumericPassword],
+    [navigation, securitySettings.hasNumericPassword],
+  );
+
+  const handleAutoLockSelect = async (minutes: number): Promise<void> => {
+    const success = await securitySettings.handleAutoLockChange(minutes);
+    if (success) {
+      setShowAutoLockModal(false);
+    }
+  };
+
+  const isFirstFocus = useRef(true);
+  const refreshSettings = securitySettings.refreshSettings;
+
+  useFocusEffect(
+    useCallback(() => {
+      if (isFirstFocus.current) {
+        isFirstFocus.current = false;
+        return;
+      }
+      refreshSettings();
+    }, [refreshSettings]),
   );
 
   if (securitySettings.loading) {
@@ -91,6 +108,7 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
         <SecuritySection
           securitySettings={securitySettings}
           passwordSettings={passwordUI}
+          onAutoLockPress={() => setShowAutoLockModal(true)}
         />
         <AppearanceSection navigation={navigation} mode={appSettings.mode} />
         <DataSection
@@ -150,6 +168,15 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
         onConfirm={() => {
           setShowLogoutModal(false);
           void appSettings.signOut?.();
+        }}
+      />
+
+      <AutoLockModal
+        visible={showAutoLockModal}
+        value={securitySettings.autoLockTimeout}
+        onClose={() => setShowAutoLockModal(false)}
+        onSelect={minutes => {
+          void handleAutoLockSelect(minutes);
         }}
       />
     </View>

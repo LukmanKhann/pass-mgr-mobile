@@ -1,6 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import {
-  Animated,
   Platform,
   ScrollView,
   StyleSheet,
@@ -16,9 +15,8 @@ import { CATEGORY_DOT_COLORS } from '../utils/password-list.util';
 import { PASSWORD_CATEGORIES } from '../../../global/constants/password-categories.constant';
 import type { ISortOrder } from '../password-list.type';
 
-const IOS_PADDING_FOCUSED = 125;
-const IOS_PADDING_UNFOCUSED = 180;
-const ANIMATION_DURATION = 250;
+const IOS_CHIP_ROW_TOP_PADDING = 180;
+const ANDROID_CHIP_ROW_TOP_PADDING = 8;
 
 interface IProps {
   selectedCategory: string;
@@ -27,7 +25,6 @@ interface IProps {
   getPasswordsByCategory: (category: string) => Array<{ category?: string }>;
   sortOrder: ISortOrder;
   onSortChange: (order: ISortOrder) => void;
-  isSearchFocused: boolean;
 }
 
 export function PasswordListHeader({
@@ -37,27 +34,8 @@ export function PasswordListHeader({
   getPasswordsByCategory,
   sortOrder,
   onSortChange,
-  isSearchFocused,
 }: IProps): JSX.Element {
   const { colors, borderRadius, spacing } = useTheme();
-  const paddingAnim = useRef(
-    new Animated.Value(Platform.OS === 'ios' ? IOS_PADDING_UNFOCUSED : 8),
-  ).current;
-
-  useEffect(() => {
-    const targetPadding =
-      Platform.OS === 'ios'
-        ? isSearchFocused
-          ? IOS_PADDING_FOCUSED
-          : IOS_PADDING_UNFOCUSED
-        : 8;
-
-    Animated.timing(paddingAnim, {
-      toValue: targetPadding,
-      duration: ANIMATION_DURATION,
-      useNativeDriver: false,
-    }).start();
-  }, [isSearchFocused, paddingAnim]);
 
   const categories = PASSWORD_CATEGORIES.map(category => ({
     ...category,
@@ -77,7 +55,17 @@ export function PasswordListHeader({
   });
 
   return (
-    <Animated.View style={[styles.chipRow, { paddingVertical: paddingAnim }]}>
+    <View
+      style={[
+        styles.chipRow,
+        {
+          paddingTop:
+            Platform.OS === 'ios'
+              ? IOS_CHIP_ROW_TOP_PADDING
+              : ANDROID_CHIP_ROW_TOP_PADDING,
+        },
+      ]}
+    >
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -139,7 +127,7 @@ export function PasswordListHeader({
           );
         })}
       </ScrollView>
-    </Animated.View>
+    </View>
   );
 }
 

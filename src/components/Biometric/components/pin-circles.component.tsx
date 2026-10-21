@@ -3,16 +3,36 @@ import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
 
+export type IPinCirclesStatus = 'default' | 'error' | 'success';
+
 export interface IPinCirclesProps {
   length: number;
   maxLength: number;
+  status?: IPinCirclesStatus;
 }
 
-export function PinCircles({ length, maxLength }: IPinCirclesProps): JSX.Element {
+export function PinCircles({
+  length,
+  maxLength,
+  status = 'default',
+}: IPinCirclesProps): JSX.Element {
   const { colors, borderRadius } = useTheme();
 
+  const filledColor =
+    status === 'error'
+      ? colors.error
+      : status === 'success'
+      ? colors.success
+      : colors.accent;
+
+  const emptyBorderColor = status === 'error' ? colors.error : colors.border;
+
   return (
-    <View style={styles.row}>
+    <View
+      style={styles.row}
+      accessible
+      accessibilityLabel={`PIN, ${length} of ${maxLength} digits entered`}
+    >
       {Array.from({ length: maxLength }).map((_, index: number) => {
         const filled = index < length;
         return (
@@ -21,7 +41,9 @@ export function PinCircles({ length, maxLength }: IPinCirclesProps): JSX.Element
             style={[
               styles.circle,
               { borderRadius: borderRadius.full },
-              filled ? { backgroundColor: colors.accent } : { backgroundColor: colors.border },
+              filled
+                ? { backgroundColor: filledColor, borderColor: filledColor }
+                : { borderColor: emptyBorderColor },
             ]}
           />
         );
@@ -34,11 +56,12 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 8,
-    marginVertical: 6,
+    gap: 14,
+    marginVertical: 20,
   },
   circle: {
-    width: 12,
-    height:  12,
+    width: 14,
+    height: 14,
+    borderWidth: 1.5,
   },
 });
