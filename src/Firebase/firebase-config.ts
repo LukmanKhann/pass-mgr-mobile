@@ -28,7 +28,21 @@ const firebaseConfig = {
   databaseURL: FIREBASE_DATABASE_URL,
 };
 
-console.log('Firebase Config:', firebaseConfig)
+// These values are inlined by react-native-dotenv at Metro transform time from
+// .env / .env.<NODE_ENV>. If they are undefined it almost always means Metro
+// was started before the env files existed and is serving a stale cache.
+const missingEnvKeys = Object.entries(firebaseConfig)
+  .filter(([, value]) => !value)
+  .map(([key]) => key);
+
+if (missingEnvKeys.length > 0) {
+  throw new Error(
+    `Missing Firebase env values: ${missingEnvKeys.join(', ')}.\n` +
+      'react-native-dotenv inlines these at build time. Make sure the env ' +
+      'file exists (e.g. .env.development) and restart Metro with a cleared ' +
+      'cache: npx react-native start --reset-cache',
+  );
+}
 
 export const app = initializeApp(firebaseConfig);
 

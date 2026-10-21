@@ -3,34 +3,22 @@ require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
     "react-native/scripts/react_native_pods.rb",
     {paths: [process.argv[1]]},
-  )', __dir__]).strip
+  )',
+  __dir__
+]).strip
 
 # Resolve the Firebase iOS SDK with CocoaPods instead of Swift Package Manager.
-# react-native-firebase v26 uses SPM by default on React Native >= 0.75, but
-# firebase-ios-sdk's SPM products are automatic (static) libraries, which are
-# incompatible with static pod linkage (duplicate-symbol link errors).
-# CocoaPods mode supports static or dynamic linkage. See https://rnfirebase.io/ios-spm
 $RNFirebaseDisableSPM = true
 
-platform :ios, min_ios_version_supported
-prepare_react_native_project!
-
-# Build every pod as a static framework, which gives each pod its own embedded module
-# map. This is required for Firebase 12+, whose Swift pods (FirebaseAuth,
-# FirebaseCoreInternal, FirebaseDatabase, FirebaseFirestore) must `import` their
-# Objective-C dependencies:
-#   - As plain static libraries those deps lack module maps:
-#       "[!] The Swift pod `X` depends upon `Y`, which does not define modules."
-#   - `use_modular_headers!` instead generates a broken module map for gRPC-Core
-#     (gRPC-Core/gRPC-C++ share the `grpc` header dir, so CocoaPods never materializes
-#     Pods/Headers/Private/grpc/gRPC-Core.modulemap):
-#       "module map file '.../gRPC-Core.modulemap' not found"
-#   Static frameworks avoid both problems. See rnfirebase.io/ios-spm and
-#   github.com/invertase/react-native-firebase/issues/7805.
+# Build Firebase dependencies as static frameworks.
 $RNFirebaseAsStaticFramework = true
 
-# Default to static linkage (matches RN's USE_FRAMEWORKS knob while keeping the
-# community-standard static-framework setup for Firebase).
+# Use iOS 17 for the app and all CocoaPods dependencies.
+platform :ios, '17.0'
+
+prepare_react_native_project!
+
+# Default to static linkage.
 linkage = ENV['USE_FRAMEWORKS'] || 'static'
 use_frameworks! :linkage => linkage.to_sym
 
@@ -48,7 +36,14 @@ target 'passMgrMobile' do
     react_native_post_install(
       installer,
       config[:reactNativePath],
-      :mac_catalyst_enabled => false,
+      :mac_catalyst_enabled => false
     )
+
+    # Ensure every generated Pod target uses iOS 17.
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |build_config|
+        build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.0'
+      end
+    end
   end
 end
