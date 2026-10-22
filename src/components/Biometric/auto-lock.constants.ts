@@ -1,4 +1,5 @@
 export const DEFAULT_AUTO_LOCK_MINUTES = 5;
+export const AUTO_LOCK_NEVER_MINUTES = -1;
 
 export interface IAutoLockOption {
   minutes: number;
@@ -32,6 +33,11 @@ export const AUTO_LOCK_OPTIONS: IAutoLockOption[] = [
     label: 'After 10 minutes',
     description: 'Lock after 10 minutes in the background',
   },
+  {
+    minutes: AUTO_LOCK_NEVER_MINUTES,
+    label: 'Never',
+    description: 'Never lock the app automatically',
+  },
 ];
 
 export function isValidAutoLockMinutes(minutes: number): boolean {
@@ -39,6 +45,9 @@ export function isValidAutoLockMinutes(minutes: number): boolean {
 }
 
 export function formatAutoLockSubtitle(minutes: number): string {
+  if (minutes === AUTO_LOCK_NEVER_MINUTES) {
+    return 'Does not lock automatically';
+  }
   if (minutes === 0) {
     return 'Locks immediately when the app is backgrounded';
   }

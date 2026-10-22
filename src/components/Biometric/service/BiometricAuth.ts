@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState } from 'react-native';
 
 import {
+  AUTO_LOCK_NEVER_MINUTES,
   DEFAULT_AUTO_LOCK_MINUTES,
   isValidAutoLockMinutes,
 } from '../auto-lock.constants';
@@ -254,6 +255,10 @@ class BiometricAuthService {
       }
 
       const autoLockTimeout = await this.getAutoLockTimeout();
+      if (autoLockTimeout === AUTO_LOCK_NEVER_MINUTES) {
+        // Auto-lock disabled: the session never expires by itself.
+        return true;
+      }
       if (autoLockTimeout === 0) {
         await this.setAuthenticationState(false);
         return false;

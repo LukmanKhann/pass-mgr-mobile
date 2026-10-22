@@ -19,6 +19,7 @@ import BiometricAuthService from './src/components/Biometric/service/BiometricAu
 import LoadingScreen from './src/screens/loading/loading-screen.component';
 import AppNavigator from './src/navigation/app-navigator.component';
 
+import { AUTO_LOCK_NEVER_MINUTES } from './src/components/Biometric/auto-lock.constants';
 import { ThemeProvider } from './src/context/theme-context.component';
 import { useTheme } from './src/hooks/use-theme.hook';
 import { AuthProvider, AuthContext } from './src/Auth/AuthContext';
@@ -110,8 +111,11 @@ function AppContent(): JSX.Element {
       backgroundedAtRef.current = null;
 
       const timeoutMinutes = await BiometricAuthService.getAutoLockTimeout();
-      const elapsedMs = Date.now() - backgroundedAt;
+      if (timeoutMinutes === AUTO_LOCK_NEVER_MINUTES) {
+        return;
+      }
 
+      const elapsedMs = Date.now() - backgroundedAt;
       if (timeoutMinutes === 0 || elapsedMs >= timeoutMinutes * 60 * 1000) {
         await lockApp();
       }
