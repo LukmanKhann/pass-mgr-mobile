@@ -3,6 +3,8 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 export type IAuthStackParamList = {
   Login: undefined;
   SignUp: undefined;
+  ForgotPassword: undefined;
+  ResetPassword: { email?: string };
 };
 
 export type IVaultStackParamList = {
@@ -19,6 +21,9 @@ export type INumericPasswordMode = 'verify' | 'set' | 'remove';
 export type ISettingsStackParamList = {
   Settings: undefined;
   Appearance: undefined;
+  Security: undefined;
+  Data: undefined;
+  Support: undefined;
   NumericPassword: {
     mode?: INumericPasswordMode;
     title?: string;

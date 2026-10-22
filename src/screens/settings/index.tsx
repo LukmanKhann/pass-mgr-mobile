@@ -1,6 +1,5 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import MaterialSymbols from '../../components/widgets/material-icon';
@@ -9,21 +8,50 @@ import { useTheme } from '../../hooks/use-theme.hook';
 import { Button } from '../../components/controls/button';
 import { Typography } from '../../components/widgets/typography';
 import { useAppSettings } from './hooks/use-app-settings.hook';
-import { useSecuritySettings } from './hooks/use-security-settings.hook';
-import { AppearanceSection } from './components/appearance-section.component';
-import { AutoLockSheet } from './components/auto-lock-sheet.component';
-import { DataSection } from './components/data-section.component';
-import { SecuritySection } from './components/security-section.component';
-import { SupportSection } from './components/support-section.component';
 import { LogoutModal } from './components/logout-modal.component';
 import { UserProfileHeader } from './components/user-profile-header.component';
+import { SectionHeader } from './components/section-header.component';
+import { SettingItem } from './components/setting-item.component';
 import { HeaderShadow } from '../../components/layouts/header-shadow';
+import { SCREENS } from '../../navigation/navigation.constant';
 import type { ISettingsStackParamList } from '../../navigation/navigation.type';
 
 type Props = NativeStackScreenProps<ISettingsStackParamList, 'Settings'>;
 
+const MODE_LABELS: Record<string, string> = {
+  light: 'Light',
+  dark: 'Dark',
+  system: 'System',
+};
+
+const MODE_ICONS: Record<string, string> = {
+  light: 'light_mode',
+  dark: 'dark_mode',
+  system: 'mobile_3',
+};
+
 export default function SettingsScreen({ navigation }: Props): JSX.Element {
-  const { colors, spacing } = useTheme();
+  const { colors, mode, spacing } = useTheme();
+  const { signOut } = useAppSettings();
+
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const openSecurity = useCallback(
+    () => navigation.navigate(SCREENS.SECURITY),
+    [navigation],
+  );
+  const openAppearance = useCallback(
+    () => navigation.navigate(SCREENS.APPEARANCE),
+    [navigation],
+  );
+  const openData = useCallback(
+    () => navigation.navigate(SCREENS.DATA),
+    [navigation],
+  );
+  const openSupport = useCallback(
+    () => navigation.navigate(SCREENS.SUPPORT),
+    [navigation],
+  );
 
   const dynamicStyles = {
     containerBackground: {
@@ -37,66 +65,6 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
     },
   };
 
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [showAutoLockSheet, setShowAutoLockSheet] = useState(false);
-
-  const appSettings = useAppSettings();
-  const securitySettings = useSecuritySettings();
-
-  const passwordUI = useMemo(
-    () => ({
-      handleSetNumericPassword: () => {
-        navigation.navigate('NumericPassword', {
-          mode: 'set',
-          title: securitySettings.hasNumericPassword
-            ? 'Change Password'
-            : 'Set Numeric Password',
-          subtitle: securitySettings.hasNumericPassword
-            ? 'Create a new 4-digit password'
-            : 'Create a 4-digit password to unlock your vault',
-        });
-      },
-      handleRemoveNumericPassword: () => {
-        navigation.navigate('NumericPassword', { mode: 'remove' });
-      },
-    }),
-    [navigation, securitySettings.hasNumericPassword],
-  );
-
-  const handleAutoLockSelect = async (minutes: number): Promise<void> => {
-    const success = await securitySettings.handleAutoLockChange(minutes);
-    if (success) {
-      setShowAutoLockSheet(false);
-    }
-  };
-
-  const isFirstFocus = useRef(true);
-  const refreshSettings = securitySettings.refreshSettings;
-
-  useFocusEffect(
-    useCallback(() => {
-      if (isFirstFocus.current) {
-        isFirstFocus.current = false;
-        return;
-      }
-      refreshSettings();
-    }, [refreshSettings]),
-  );
-
-  if (securitySettings.loading) {
-    return (
-      <View style={[styles.container, dynamicStyles.containerBackground]}>
-        <Typography
-          variant="bodyMd"
-          color={colors.textSecondary}
-          style={styles.loading}
-        >
-          Loading settings...
-        </Typography>
-      </View>
-    );
-  }
-
   return (
     <View style={[styles.container, dynamicStyles.containerBackground]}>
       <HeaderShadow />
@@ -105,24 +73,44 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
         showsVerticalScrollIndicator={false}
       >
         <UserProfileHeader />
-        <SecuritySection
-          securitySettings={securitySettings}
-          passwordSettings={passwordUI}
-          onAutoLockPress={() => setShowAutoLockSheet(true)}
-        />
-        <AppearanceSection navigation={navigation} mode={appSettings.mode} />
-        <DataSection
-          handleBackupSync={appSettings.handleBackupSync}
-          handleExportData={appSettings.handleExportData}
-          handleImportData={appSettings.handleImportData}
-        />
-        <SupportSection
-          handleHelpSupport={appSettings.handleHelpSupport}
-          handleAbout={appSettings.handleAbout}
-          handleRateApp={appSettings.handleRateApp}
+
+        <SectionHeader title="Security" />
+        <SettingItem
+          icon="shield_lock"
+          title="Security"
+          subtitle="Biometric, numeric password & auto-lock"
+          showArrow
+          onPress={openSecurity}
         />
 
-        <View style={[styles.logout, dynamicStyles.logoutMargin]}>
+        <SectionHeader title="Preferences" />
+        <SettingItem
+          icon={MODE_ICONS[mode] ?? 'palette'}
+          title="Appearance"
+          subtitle={`${MODE_LABELS[mode] ?? 'System'} theme`}
+          showArrow
+          onPress={openAppearance}
+        />
+
+        <SectionHeader title="Data" />
+        <SettingItem
+          icon="cloud_upload"
+          title="Data"
+          subtitle="Backup, export & import"
+          showArrow
+          onPress={openData}
+        />
+
+        <SectionHeader title="Support" />
+        <SettingItem
+          icon="help"
+          title="Support"
+          subtitle="Help, about & rate us"
+          showArrow
+          onPress={openSupport}
+        />
+
+        <View style={[styles.footer, dynamicStyles.logoutMargin]}>
           <Button
             title="Sign Out"
             onPress={() => setShowLogoutModal(true)}
@@ -136,29 +124,23 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
               />
             }
           />
-        </View>
 
-        <View
-          style={[
-            styles.version,
-            dynamicStyles.versionGap,
-            dynamicStyles.logoutMargin,
-          ]}
-        >
-          <Typography
-            variant="caption"
-            color={colors.textTertiary}
-            align="center"
-          >
-            SecureVault v1.0.0
-          </Typography>
-          <Typography
-            variant="caption"
-            color={colors.textTertiary}
-            align="center"
-          >
-            Made with love for your security
-          </Typography>
+          <View style={[styles.version, dynamicStyles.versionGap]}>
+            <Typography
+              variant="caption"
+              color={colors.textTertiary}
+              align="center"
+            >
+              SecureVault v1.0.0
+            </Typography>
+            <Typography
+              variant="caption"
+              color={colors.textTertiary}
+              align="center"
+            >
+              Made with love for your security
+            </Typography>
+          </View>
         </View>
       </ScrollView>
 
@@ -167,16 +149,7 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
         onClose={() => setShowLogoutModal(false)}
         onConfirm={() => {
           setShowLogoutModal(false);
-          void appSettings.signOut?.();
-        }}
-      />
-
-      <AutoLockSheet
-        visible={showAutoLockSheet}
-        value={securitySettings.autoLockTimeout}
-        onClose={() => setShowAutoLockSheet(false)}
-        onSelect={minutes => {
-          void handleAutoLockSelect(minutes);
+          void signOut?.();
         }}
       />
     </View>
@@ -190,12 +163,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 100,
   },
-  loading: {
-    textAlign: 'center',
-    marginTop: 40,
-  },
-  logout: {
-    marginHorizontal: 16,
+  footer: {
+    gap: 24,
+    paddingHorizontal: 16,
   },
   version: {
     alignItems: 'center',

@@ -10,8 +10,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import NumericPasswordScreen from '../screens/numeric-password/numeric-password-screen.component';
 import AppearanceScreen from '../screens/settings/appearance.screen';
+import ForgotPasswordScreen from '../screens/password-reset/forgot-password.screen';
 import LoadingScreen from '../screens/loading/loading-screen.component';
 import LoginScreen from '../screens/login/login-screen.component';
+import ResetPasswordScreen from '../screens/password-reset/reset-password.screen';
 import SignUpScreen from '../screens/sign-up/sign-up-screen.component';
 
 import { useTheme } from '../hooks/use-theme.hook';
@@ -111,6 +113,16 @@ function AppNavigatorInner(): JSX.Element {
           <AuthStack.Screen
             name={SCREENS.SIGN_UP as 'SignUp'}
             component={SignUpScreen}
+            options={{ headerShown: false }}
+          />
+          <AuthStack.Screen
+            name={SCREENS.FORGOT_PASSWORD as 'ForgotPassword'}
+            component={ForgotPasswordScreen}
+            options={{ headerShown: false }}
+          />
+          <AuthStack.Screen
+            name={SCREENS.RESET_PASSWORD as 'ResetPassword'}
+            component={ResetPasswordScreen}
             options={{ headerShown: false }}
           />
         </AuthStack.Navigator>

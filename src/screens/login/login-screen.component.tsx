@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import MaterialSymbols from '../../components/widgets/material-icon';
 
@@ -12,12 +13,12 @@ import { Typography } from '../../components/widgets/typography';
 import { FIREBASE_AUTH } from '../../Firebase/firebase-config';
 import { CustomSnackbar } from '../../global/utils/toast.util';
 import { MotionView } from '../../motion';
+import { SCREENS } from '../../navigation/navigation.constant';
+import type { IAuthStackParamList } from '../../navigation/navigation.type';
 
-interface IProps {
-  navigation: { navigate: (screen: string) => void };
-}
+type Props = NativeStackScreenProps<IAuthStackParamList, 'Login'>;
 
-export default function LoginScreen({ navigation }: IProps): JSX.Element {
+export default function LoginScreen({ navigation }: Props): JSX.Element {
   const { colors, spacing } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -115,6 +116,15 @@ export default function LoginScreen({ navigation }: IProps): JSX.Element {
             }
             onRightIconPress={() => setShowPassword(prev => !prev)}
           />
+          <Typography
+            variant="bodyMd"
+            color={colors.accent}
+            align="right"
+            fontWeight="600"
+            onPress={() => navigation.navigate(SCREENS.FORGOT_PASSWORD)}
+          >
+            Forgot Password?
+          </Typography>
           <Button
             title={loading ? 'Signing in...' : 'Sign In'}
             onPress={handleLogin}

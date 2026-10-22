@@ -1,15 +1,10 @@
 import { useCallback, useContext } from 'react';
 
-import { useTheme } from '../../../hooks/use-theme.hook';
 import { AuthContext } from '../../../Auth/AuthContext';
 import { CustomSnackbar } from '../../../global/utils/toast.util';
-import type { IThemeMode } from '../../../context/theme-context.component';
 
 export function useAppSettings() {
-  const { mode, setMode } = useTheme();
-  const { signOut, user } = useContext(AuthContext);
-
-  const handleLogout = useCallback(() => {}, []);
+  const { signOut } = useContext(AuthContext);
 
   const handleBackupSync = useCallback(() => {
     CustomSnackbar.info('Coming Soon', 'This feature will be available soon');
@@ -38,19 +33,8 @@ export function useAppSettings() {
     CustomSnackbar.info('Rate Us', 'Thank you for using SecureVault!');
   }, []);
 
-  const handleModeChange = useCallback(
-    (newMode: IThemeMode) => {
-      setMode(newMode);
-    },
-    [setMode],
-  );
-
   return {
-    mode,
-    handleModeChange,
-    user,
     signOut,
-    handleLogout,
     handleBackupSync,
     handleExportData,
     handleImportData,
