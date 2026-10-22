@@ -26,7 +26,7 @@ import { PasswordProvider } from './src/context/PasswordContext/password-context
 import type { IColorTokens } from './src/theme/colors.theme';
 
 function AppContent(): JSX.Element {
-  const { user, loading, signOut } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
   const [isBiometricAuthenticated, setIsBiometricAuthenticated] =
     useState(false);
   const [needsBiometricAuth, setNeedsBiometricAuth] = useState(false);
@@ -48,10 +48,8 @@ function AppContent(): JSX.Element {
       if (user) {
         const biometricEnabled =
           await BiometricAuthService.isBiometricEnabled();
-        const hasNumericPassword =
-          await BiometricAuthService.hasNumericPassword();
 
-        if (biometricEnabled || hasNumericPassword) {
+        if (biometricEnabled) {
           setNeedsBiometricAuth(true);
           setIsBiometricAuthenticated(false);
         } else {
@@ -126,16 +124,6 @@ function AppContent(): JSX.Element {
     return () => subscription.remove();
   }, []);
 
-  const handleForgotPin = useCallback(async (): Promise<void> => {
-    try {
-      await BiometricAuthService.setNumericPassword('');
-      await BiometricAuthService.setBiometricEnabled(false);
-      await BiometricAuthService.setAuthenticationState(false);
-    } finally {
-      await signOut();
-    }
-  }, [signOut]);
-
   const handleBiometricAuthenticated = useCallback((): void => {
     setIsBiometricAuthenticated(true);
     setNeedsBiometricAuth(false);
@@ -155,7 +143,6 @@ function AppContent(): JSX.Element {
       <AuthLockScreen
         onAuthenticated={handleBiometricAuthenticated}
         onSetupRequired={handleBiometricSetupRequired}
-        onForgotPin={handleForgotPin}
       />
     );
   }

@@ -78,7 +78,7 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
         <SettingItem
           icon="shield_lock"
           title="Security"
-          subtitle="Biometric, numeric password & auto-lock"
+          subtitle="Biometric unlock & auto-lock"
           showArrow
           onPress={openSecurity}
         />

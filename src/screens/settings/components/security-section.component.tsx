@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, TouchableOpacity } from 'react-native';
+import { Switch } from 'react-native';
 
 import MaterialSymbols from '../../../components/widgets/material-icon';
 
@@ -12,44 +12,30 @@ interface ISecuritySettingsShape {
   biometricEnabled: boolean;
   biometricAvailable: boolean;
   biometryType: string;
-  hasNumericPassword: boolean;
   autoLockTimeout: number;
-  handleBiometricToggle: (
-    enabled: boolean,
-    suppressSnackbar?: boolean,
-  ) => Promise<boolean>;
+  handleBiometricToggle: (enabled: boolean) => Promise<void>;
   getAuthenticationStatus: () => string;
   canEnableBiometric: () => boolean;
 }
 
-interface IPasswordSettingsShape {
-  handleSetNumericPassword: () => void;
-  handleRemoveNumericPassword: () => void;
-}
-
 interface IProps {
   securitySettings: ISecuritySettingsShape;
-  passwordSettings: IPasswordSettingsShape;
   onAutoLockPress: () => void;
 }
 
 export function SecuritySection({
   securitySettings,
-  passwordSettings,
   onAutoLockPress,
 }: IProps): JSX.Element {
   const { colors } = useTheme();
   const {
     biometricEnabled,
     biometryType,
-    hasNumericPassword,
     autoLockTimeout,
     handleBiometricToggle,
     getAuthenticationStatus,
     canEnableBiometric,
   } = securitySettings;
-  const { handleSetNumericPassword, handleRemoveNumericPassword } =
-    passwordSettings;
 
   return (
     <>
@@ -64,11 +50,11 @@ export function SecuritySection({
       />
       <SettingItem
         icon={biometryType === 'Face ID' ? 'person' : 'fingerprint'}
-        title={`${biometryType} Authentication`}
+        title={biometryType}
         subtitle={
-          !hasNumericPassword
-            ? 'Requires numeric password to be set first'
-            : `Use ${biometryType.toLowerCase()} to unlock`
+          !canEnableBiometric()
+            ? 'Biometrics are not available on this device'
+            : `Use ${biometryType.toLowerCase()} to unlock or disable the lock`
         }
         disabled={!canEnableBiometric()}
         rightComponent={
@@ -81,30 +67,6 @@ export function SecuritySection({
             trackColor={{ false: colors.border, true: colors.accentLight }}
             thumbColor={biometricEnabled ? colors.accent : colors.textTertiary}
           />
-        }
-      />
-      <SettingItem
-        icon="lock"
-        title="Numeric Password"
-        subtitle={
-          hasNumericPassword
-            ? 'Use 4-digit password to unlock'
-            : 'Set up numeric password'
-        }
-        onPress={handleSetNumericPassword}
-        showArrow={!hasNumericPassword}
-        rightComponent={
-          hasNumericPassword ? (
-            <TouchableOpacity
-              onPress={handleRemoveNumericPassword}
-              activeOpacity={0.7}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel="Remove numeric password"
-            >
-              <MaterialSymbols name="close" size={20} color={colors.error} />
-            </TouchableOpacity>
-          ) : undefined
         }
       />
       <SettingItem

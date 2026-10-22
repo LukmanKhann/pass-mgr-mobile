@@ -6,7 +6,6 @@ import {
   AUTH_SUCCESS_DELAY_MS,
   BIOMETRIC_PROMPT_DELAY_MS,
   EMPTY_AUTH_METHODS,
-  MAX_PIN_ATTEMPTS,
 } from '../constants/auth-lock.constant';
 import type {
   IAuthMethods,
@@ -17,28 +16,16 @@ import type {
 export function useAuthLock({
   onAuthenticated,
   onSetupRequired,
-  onForgotPin,
 }: IUseAuthLockParams): IUseAuthLockResult {
   const [isLoading, setIsLoading] = useState(true);
   const [authMethods, setAuthMethods] =
     useState<IAuthMethods>(EMPTY_AUTH_METHODS);
-  const [showPinSheet, setShowPinSheet] = useState(false);
-  const [showForgotModal, setShowForgotModal] = useState(false);
-  const [showLimitModal, setShowLimitModal] = useState(false);
-  const [attempts, setAttempts] = useState(0);
 
   const hasAttemptedBiometricRef = useRef(false);
   const wasBackgroundedRef = useRef(false);
   const pendingBiometricPromptRef = useRef(false);
   const biometricInFlightRef = useRef(false);
-  const limitPendingRef = useRef(false);
-  const pinSheetVisibleRef = useRef(false);
   const promptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const setPinSheetVisibility = useCallback((visible: boolean): void => {
-    pinSheetVisibleRef.current = visible;
-    setShowPinSheet(visible);
-  }, []);
 
   const handleBiometricAuth = useCallback(async (): Promise<void> => {
     if (biometricInFlightRef.current) {
@@ -53,13 +40,12 @@ export function useAuthLock({
       );
 
       if (result.success) {
-        setPinSheetVisibility(false);
         setTimeout(onAuthenticated, AUTH_SUCCESS_DELAY_MS);
       }
     } finally {
       biometricInFlightRef.current = false;
     }
-  }, [onAuthenticated, setPinSheetVisibility]);
+  }, [onAuthenticated]);
 
   const scheduleBiometricPrompt = useCallback((): void => {
     if (promptTimeoutRef.current) {
@@ -69,7 +55,7 @@ export function useAuthLock({
     promptTimeoutRef.current = setTimeout(() => {
       promptTimeoutRef.current = null;
       if (AppState.currentState === 'active') {
-        handleBiometricAuth();
+        void handleBiometricAuth();
         return;
       }
       pendingBiometricPromptRef.current = true;
@@ -79,27 +65,16 @@ export function useAuthLock({
   const initializeAuth = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const [biometricEnabled, hasNumericPassword, biometryType] =
-        await Promise.all([
-          BiometricAuthService.isBiometricEnabled(),
-          BiometricAuthService.hasNumericPassword(),
-          BiometricAuthService.getBiometryType(),
-        ]);
+      const [biometricEnabled, biometryType] = await Promise.all([
+        BiometricAuthService.isBiometricEnabled(),
+        BiometricAuthService.getBiometryType(),
+      ]);
 
-      const methods: IAuthMethods = {
-        biometric: biometricEnabled,
-        numeric: hasNumericPassword,
-        biometryType,
-      };
+      const methods: IAuthMethods = { biometric: biometricEnabled, biometryType };
       setAuthMethods(methods);
 
-      if (!methods.biometric && !methods.numeric) {
+      if (!methods.biometric) {
         onSetupRequired();
-        return;
-      }
-
-      if (!methods.biometric && methods.numeric) {
-        setPinSheetVisibility(true);
         return;
       }
 
@@ -112,7 +87,7 @@ export function useAuthLock({
     } finally {
       setIsLoading(false);
     }
-  }, [onSetupRequired, scheduleBiometricPrompt, setPinSheetVisibility]);
+  }, [onSetupRequired, scheduleBiometricPrompt]);
 
   useEffect(() => {
     initializeAuth();
@@ -120,7 +95,6 @@ export function useAuthLock({
     const handleAppStateChange = (nextAppState: string): void => {
       if (nextAppState === 'background') {
         wasBackgroundedRef.current = true;
-        setPinSheetVisibility(false);
         if (promptTimeoutRef.current) {
           clearTimeout(promptTimeoutRef.current);
           promptTimeoutRef.current = null;
@@ -138,7 +112,6 @@ export function useAuthLock({
       pendingBiometricPromptRef.current = false;
 
       if (shouldRetry) {
-        setAttempts(0);
         hasAttemptedBiometricRef.current = false;
         initializeAuth();
       }
@@ -156,85 +129,11 @@ export function useAuthLock({
         promptTimeoutRef.current = null;
       }
     };
-  }, [initializeAuth, setPinSheetVisibility]);
-
-  const handleVerifyPin = useCallback(
-    async (pin: string): Promise<boolean> => {
-      const isValid = await BiometricAuthService.verifyNumericPassword(pin);
-
-      if (isValid) {
-        setPinSheetVisibility(false);
-        setAttempts(0);
-        setTimeout(onAuthenticated, AUTH_SUCCESS_DELAY_MS);
-        return true;
-      }
-
-      const nextAttempts = attempts + 1;
-      setAttempts(nextAttempts);
-
-      if (nextAttempts >= MAX_PIN_ATTEMPTS) {
-        if (pinSheetVisibleRef.current) {
-          limitPendingRef.current = true;
-          setPinSheetVisibility(false);
-        } else {
-          setShowLimitModal(true);
-        }
-      }
-
-      return false;
-    },
-    [attempts, onAuthenticated, setPinSheetVisibility],
-  );
-
-  const handlePinSheetDismissed = useCallback((): void => {
-    if (!limitPendingRef.current) {
-      return;
-    }
-    limitPendingRef.current = false;
-    setShowLimitModal(true);
-  }, []);
-
-  const handleUsePin = useCallback((): void => {
-    setPinSheetVisibility(true);
-  }, [setPinSheetVisibility]);
-
-  const handleClosePinSheet = useCallback((): void => {
-    setPinSheetVisibility(false);
-  }, [setPinSheetVisibility]);
-
-  const handleForgotRequest = useCallback((): void => {
-    setPinSheetVisibility(false);
-    setShowForgotModal(true);
-  }, [setPinSheetVisibility]);
-
-  const handleCloseForgotModal = useCallback((): void => {
-    setShowForgotModal(false);
-  }, []);
-
-  const handleForgotConfirm = useCallback((): void => {
-    setShowForgotModal(false);
-    setPinSheetVisibility(false);
-    onForgotPin();
-  }, [onForgotPin, setPinSheetVisibility]);
-
-  const handleCloseLimitModal = useCallback((): void => {
-    setShowLimitModal(false);
-  }, []);
+  }, [initializeAuth]);
 
   return {
     isLoading,
     authMethods,
-    showPinSheet,
-    showForgotModal,
-    showLimitModal,
     handleBiometricAuth,
-    handleUsePin,
-    handleClosePinSheet,
-    handleVerifyPin,
-    handlePinSheetDismissed,
-    handleForgotRequest,
-    handleCloseForgotModal,
-    handleForgotConfirm,
-    handleCloseLimitModal,
   };
 }

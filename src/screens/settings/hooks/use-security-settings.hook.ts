@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
 
 import BiometricAuthService from '../../../components/Biometric/service/BiometricAuth';
 import { DEFAULT_AUTO_LOCK_MINUTES } from '../../../components/Biometric/auto-lock.constants';
@@ -10,7 +9,6 @@ export function useSecuritySettings() {
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometryType, setBiometryType] = useState('Biometric');
-  const [hasNumericPassword, setHasNumericPassword] = useState(false);
   const [autoLockTimeout, setAutoLockTimeout] = useState(
     DEFAULT_AUTO_LOCK_MINUTES,
   );
@@ -21,24 +19,15 @@ export function useSecuritySettings() {
       if (showLoading) {
         setLoading(true);
       }
-      const [
-        biometricEnabledStatus,
-        biometricAvailability,
-        biometryTypeResult,
-        numericPasswordStatus,
-        autoLockTimeoutStatus,
-      ] = await Promise.all([
-        BiometricAuthService.isBiometricEnabled(),
-        BiometricAuthService.isBiometricAvailable(),
-        BiometricAuthService.getBiometryType(),
-        BiometricAuthService.hasNumericPassword(),
-        BiometricAuthService.getAutoLockTimeout(),
-      ]);
+      const [biometricEnabledStatus, biometricAvailability, biometryTypeResult] =
+        await Promise.all([
+          BiometricAuthService.isBiometricEnabled(),
+          BiometricAuthService.isBiometricAvailable(),
+          BiometricAuthService.getBiometryType(),
+        ]);
       setBiometricEnabled(biometricEnabledStatus);
       setBiometricAvailable(biometricAvailability.available);
       setBiometryType(biometryTypeResult);
-      setHasNumericPassword(numericPasswordStatus);
-      setAutoLockTimeout(autoLockTimeoutStatus);
     } catch {
       if (showLoading) {
         CustomSnackbar.error('Failed to load security settings.');
@@ -65,49 +54,26 @@ export function useSecuritySettings() {
   }, [initializeSettings]);
 
   const handleBiometricToggle = useCallback(
-    async (enabled: boolean, suppressSnackbar: boolean = false) => {
+    async (enabled: boolean): Promise<void> => {
       try {
-        if (enabled && !hasNumericPassword) {
-          Alert.alert(
-            'Numeric Password Required',
-            'You must set up a numeric password before enabling biometric authentication.',
-            [{ text: 'OK', style: 'default' }],
-          );
-          return false;
-        }
-        if (enabled && !biometricAvailable) {
-          if (!suppressSnackbar) {
-            CustomSnackbar.warning(
-              'Biometric authentication is not available on this device.',
-            );
-          }
-          return false;
-        }
         const success = await BiometricAuthService.setBiometricEnabled(enabled);
         if (success) {
           setBiometricEnabled(enabled);
-          if (!suppressSnackbar) {
-            if (enabled) {
-              CustomSnackbar.success(
-                `${biometryType} authentication has been enabled successfully.`,
-              );
-            } else {
-              CustomSnackbar.error(
-                'Biometric authentication has been disabled.',
-              );
-            }
+          if (enabled) {
+            CustomSnackbar.success(
+              `${biometryType} authentication has been enabled successfully.`,
+            );
+          } else {
+            CustomSnackbar.error(
+              'Biometric authentication has been disabled.',
+            );
           }
-          return true;
         }
-        return false;
       } catch {
-        if (!suppressSnackbar) {
-          CustomSnackbar.error('Failed to update biometric settings.');
-        }
-        return false;
+        CustomSnackbar.error('Failed to update biometric settings.');
       }
     },
-    [hasNumericPassword, biometricAvailable, biometryType],
+    [biometryType],
   );
 
   const handleAutoLockChange = useCallback(async (minutes: number) => {
@@ -127,23 +93,19 @@ export function useSecuritySettings() {
   }, []);
 
   const getAuthenticationStatus = useCallback((): string => {
-    if (biometricEnabled && hasNumericPassword) {
-      return `${biometryType} + Numeric`;
-    }
     if (biometricEnabled) return biometryType;
-    if (hasNumericPassword) return 'Numeric Only';
-    return 'Not Configured';
-  }, [biometricEnabled, hasNumericPassword, biometryType]);
+    return 'Not Enabled';
+  }, [biometricEnabled, biometryType]);
 
-  const canEnableBiometric = useCallback((): boolean => {
-    return biometricAvailable && hasNumericPassword;
-  }, [biometricAvailable, hasNumericPassword]);
+  const canEnableBiometric = useCallback(
+    (): boolean => biometricAvailable,
+    [biometricAvailable],
+  );
 
   return {
     biometricEnabled,
     biometricAvailable,
     biometryType,
-    hasNumericPassword,
     autoLockTimeout,
     loading,
     handleBiometricToggle,
@@ -152,6 +114,5 @@ export function useSecuritySettings() {
     refreshSettings,
     getAuthenticationStatus,
     canEnableBiometric,
-    setHasNumericPassword,
   };
 }

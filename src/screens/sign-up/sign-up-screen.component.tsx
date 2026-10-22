@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Keyboard,
   StyleSheet,
-  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -83,25 +82,6 @@ export default function SignUpScreen({ navigation }: IProps): JSX.Element {
     <ScreenContainer>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollContainer contentContainerStyle={styles.scrollContent}>
-          <TouchableOpacity
-            onPress={navigation.goBack}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Go back to sign in"
-            style={[
-              styles.backButton,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <MaterialSymbols
-              name="arrow_back_ios_new"
-              size={18}
-              color={colors.textPrimary}
-            />
-          </TouchableOpacity>
           <View style={[styles.header, { gap: spacing.sm }]}>
             <MaterialSymbols
               name="account_circle"
@@ -245,17 +225,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     padding: 24,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 8,
-    left: 0,
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    borderWidth: 1,
   },
   header: {
     alignItems: 'center',

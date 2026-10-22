@@ -25,14 +25,8 @@ export function getBiometricIcon(biometryType: string): string {
 }
 
 export function getUnlockSubtitle(methods: IAuthMethods): string {
-  if (methods.biometric && methods.numeric) {
-    return 'Use biometrics or your PIN to continue';
-  }
   if (methods.biometric) {
-    return 'Use your biometrics to continue';
-  }
-  if (methods.numeric) {
-    return 'Enter your PIN to continue';
+    return `Use your ${methods.biometryType} to continue`;
   }
   return 'Unlock your vault to continue';
 }

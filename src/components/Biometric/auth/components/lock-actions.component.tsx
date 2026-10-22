@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import MaterialSymbols from '../../../widgets/material-icon';
 
@@ -16,25 +16,23 @@ import type { IAuthMethods } from '../auth-lock.type';
 interface IProps {
   authMethods: IAuthMethods;
   onBiometricPress: () => void;
-  onPinPress: () => void;
 }
 
-export function LockActions({
-  authMethods,
-  onBiometricPress,
-  onPinPress,
-}: IProps): JSX.Element {
+export function LockActions({ authMethods, onBiometricPress }: IProps): JSX.Element {
   const { colors, spacing } = useTheme();
-  const hasBiometric = authMethods.biometric;
-  const hasNumeric = authMethods.numeric;
-  const hasAction = hasBiometric || hasNumeric;
 
-  const primaryTitle = hasBiometric
-    ? getBiometricButtonLabel(authMethods.biometryType)
-    : 'Enter PIN';
-  const primaryIcon = hasBiometric
-    ? getBiometricIcon(authMethods.biometryType)
-    : 'dialpad';
+  if (!authMethods.biometric) {
+    return (
+      <View style={[styles.container, { paddingHorizontal: spacing.xl }]}>
+        <Typography variant="headingMd" color={colors.textPrimary}>
+          Welcome back
+        </Typography>
+        <Typography variant="bodyMd" color={colors.textSecondary} align="center">
+          {getUnlockSubtitle(authMethods)}
+        </Typography>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { paddingHorizontal: spacing.xl }]}>
@@ -45,36 +43,20 @@ export function LockActions({
         {getUnlockSubtitle(authMethods)}
       </Typography>
 
-      {hasAction ? (
-        <Button
-          title={primaryTitle}
-          onPress={hasBiometric ? onBiometricPress : onPinPress}
-          size="lg"
-          fullWidth
-          icon={
-            <MaterialSymbols
-              name={primaryIcon}
-              size={20}
-              color={colors.textOnPrimary}
-            />
-          }
-          style={styles.primaryButton}
-        />
-      ) : null}
-
-      {hasBiometric && hasNumeric ? (
-        <TouchableOpacity
-          onPress={onPinPress}
-          activeOpacity={0.7}
-          accessibilityRole="button"
-          accessibilityLabel="Use PIN instead of biometrics"
-          style={styles.linkButton}
-        >
-          <Typography variant="bodyMd" color={colors.accent} fontWeight="600">
-            Use PIN instead
-          </Typography>
-        </TouchableOpacity>
-      ) : null}
+      <Button
+        title={getBiometricButtonLabel(authMethods.biometryType)}
+        onPress={onBiometricPress}
+        size="lg"
+        fullWidth
+        icon={
+          <MaterialSymbols
+            name={getBiometricIcon(authMethods.biometryType)}
+            size={20}
+            color={colors.textOnPrimary}
+          />
+        }
+        style={styles.primaryButton}
+      />
     </View>
   );
 }
@@ -88,10 +70,5 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     marginTop: 12,
-  },
-  linkButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginTop: 4,
   },
 });

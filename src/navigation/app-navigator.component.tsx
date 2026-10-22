@@ -8,7 +8,6 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import NumericPasswordScreen from '../screens/numeric-password/numeric-password-screen.component';
 import AppearanceScreen from '../screens/settings/appearance.screen';
 import ForgotPasswordScreen from '../screens/password-reset/forgot-password.screen';
 import LoadingScreen from '../screens/loading/loading-screen.component';
@@ -89,11 +88,6 @@ function AppNavigatorInner(): JSX.Element {
         >
           <RootStack.Screen name="Main" component={BottomTabNavigator} />
           <RootStack.Screen
-            name="NumericPassword"
-            component={NumericPasswordScreen}
-            options={{ headerShown: false }}
-          />
-          <RootStack.Screen
             name="Appearance"
             component={AppearanceScreen}
             options={{
@@ -113,7 +107,14 @@ function AppNavigatorInner(): JSX.Element {
           <AuthStack.Screen
             name={SCREENS.SIGN_UP as 'SignUp'}
             component={SignUpScreen}
-            options={{ headerShown: false }}
+            options={{
+              headerShown: true,
+              title: '',
+              headerStyle: { backgroundColor: colors.background },
+              headerTintColor: colors.accent,
+              headerShadowVisible: false,
+              headerBackButtonDisplayMode: 'minimal',
+            }}
           />
           <AuthStack.Screen
             name={SCREENS.FORGOT_PASSWORD as 'ForgotPassword'}

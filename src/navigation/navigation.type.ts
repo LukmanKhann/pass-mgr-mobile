@@ -16,19 +16,12 @@ export type IGeneratorStackParamList = {
   Generator: undefined;
 };
 
-export type INumericPasswordMode = 'verify' | 'set' | 'remove';
-
 export type ISettingsStackParamList = {
   Settings: undefined;
   Appearance: undefined;
   Security: undefined;
   Data: undefined;
   Support: undefined;
-  NumericPassword: {
-    mode?: INumericPasswordMode;
-    title?: string;
-    subtitle?: string;
-  };
 };
 
 export type IAddCredentialParamList = undefined;
@@ -42,10 +35,5 @@ export type IMainTabParamList = {
 
 export type IRootStackParamList = {
   Main: NavigatorScreenParams<IMainTabParamList>;
-  NumericPassword: {
-    mode?: INumericPasswordMode;
-    title?: string;
-    subtitle?: string;
-  };
   Appearance: undefined;
 };
