@@ -1,4 +1,5 @@
 package com.passmgrmobile
+
 import expo.modules.ReactActivityDelegateWrapper
 
 import com.facebook.react.ReactActivity
