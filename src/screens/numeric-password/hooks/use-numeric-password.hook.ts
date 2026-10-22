@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 import BiometricAuthService from '../../../components/Biometric/service/BiometricAuth';
 
 import type { INumericPasswordMode } from '../../../navigation/navigation.type';
-import { CustomSnackbar } from '../../../global/utils/nitro-toast.util';
+import { CustomSnackbar } from '../../../global/utils/toast.util';
 
 export type INumericPasswordStep = 'verify' | 'create' | 'confirm';
 

@@ -7,7 +7,7 @@ import {
   DEFAULT_AUTO_LOCK_MINUTES,
   isValidAutoLockMinutes,
 } from '../auto-lock.constants';
-import { default as CustomSnackbar } from '../../../global/utils/nitro-toast.util';
+import { default as CustomSnackbar } from '../../../global/utils/toast.util';
 
 const rnBiometrics = new ReactNativeBiometrics();
 

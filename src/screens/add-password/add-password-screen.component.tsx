@@ -17,7 +17,7 @@ import { useTheme } from '../../hooks/use-theme.hook';
 import { Button } from '../../components/controls/button';
 import { Input } from '../../components/controls/input';
 import { Typography } from '../../components/widgets/typography';
-import { CustomSnackbar } from '../../global/utils/nitro-toast.util';
+import { CustomSnackbar } from '../../global/utils/toast.util';
 import {
   CATEGORIES,
   CATEGORY_DOT_COLORS,

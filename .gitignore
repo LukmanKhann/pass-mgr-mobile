@@ -95,3 +95,8 @@ ios/link-assets-manifest.json
 
 # TypeScript build cache
 *.tsbuildinfo
+
+# Expo
+.expo
+dist/
+web-build/

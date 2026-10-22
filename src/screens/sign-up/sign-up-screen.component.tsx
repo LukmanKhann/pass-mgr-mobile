@@ -16,7 +16,7 @@ import { ScreenContainer } from '../../components/layouts/screen-container';
 import { ScrollContainer } from '../../components/layouts/scroll-container';
 import { Typography } from '../../components/widgets/typography';
 import { FIREBASE_AUTH } from '../../Firebase/firebase-config';
-import { CustomSnackbar } from '../../global/utils/nitro-toast.util';
+import { CustomSnackbar } from '../../global/utils/toast.util';
 
 interface IProps {
   navigation: { navigate: (screen: string) => void; goBack: () => void };

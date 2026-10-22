@@ -23,7 +23,6 @@ import { ThemeProvider } from './src/context/theme-context.component';
 import { useTheme } from './src/hooks/use-theme.hook';
 import { AuthProvider, AuthContext } from './src/Auth/AuthContext';
 import { PasswordProvider } from './src/context/PasswordContext/password-context.component';
-import { ToastHost } from './src/global/utils/nitro-toast.util';
 import type { IColorTokens } from './src/theme/colors.theme';
 
 function AppContent(): JSX.Element {
@@ -215,7 +214,6 @@ function App(): JSX.Element {
         <AuthProvider>
           <PasswordProvider>
             <ThemedPaperProvider>
-              <ToastHost />
               <AppContent />
             </ThemedPaperProvider>
           </PasswordProvider>

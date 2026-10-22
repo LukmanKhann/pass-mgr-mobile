@@ -203,7 +203,7 @@ export function PinUnlockSheet({
             color={error ? colors.error : colors.textTertiary}
             align="center"
           >
-            {error || 'Your PIN never leaves this device.'}
+            {error}
           </Typography>
         </View>
 
@@ -238,9 +238,8 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   messageContainer: {
-    minHeight: 20,
     justifyContent: 'center',
-    paddingHorizontal: 8,
+    marginBottom: 16,
   },
   forgotButton: {
     marginTop: 12,

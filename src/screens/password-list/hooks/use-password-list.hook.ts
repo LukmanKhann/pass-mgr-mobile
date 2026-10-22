@@ -5,7 +5,7 @@ import { Alert } from 'react-native';
 import PasswordContext from '../../../context/PasswordContext/password-context.component';
 
 import type { IPasswordItem } from '../../../global/types/common.type';
-import { CustomSnackbar } from '../../../global/utils/nitro-toast.util';
+import { CustomSnackbar } from '../../../global/utils/toast.util';
 
 interface IPasswordListState {
   filteredPasswords: IPasswordItem[];
@@ -106,7 +106,7 @@ export function usePasswordList(): IPasswordListState {
                 setLoading(true);
                 await deletePassword(id);
                 showSnackbar('Password deleted successfully', 'success');
-              } catch (error) {
+              } catch {
                 showSnackbar('Failed to delete password', 'error');
               } finally {
                 setLoading(false);
@@ -139,7 +139,7 @@ export function usePasswordList(): IPasswordListState {
         setUsername('');
         setPassword('');
         setCategory('');
-      } catch (error) {
+      } catch {
         showSnackbar('Failed to update password', 'error');
       } finally {
         setLoading(false);
@@ -152,7 +152,7 @@ export function usePasswordList(): IPasswordListState {
     setRefreshing(true);
     try {
       await loadPasswords();
-    } catch (error) {
+    } catch {
       showSnackbar('Failed to refresh passwords', 'error');
     } finally {
       setRefreshing(false);

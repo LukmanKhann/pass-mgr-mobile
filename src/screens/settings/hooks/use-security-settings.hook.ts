@@ -4,7 +4,7 @@ import { Alert } from 'react-native';
 import BiometricAuthService from '../../../components/Biometric/service/BiometricAuth';
 import { DEFAULT_AUTO_LOCK_MINUTES } from '../../../components/Biometric/auto-lock.constants';
 
-import { CustomSnackbar } from '../../../global/utils/nitro-toast.util';
+import { CustomSnackbar } from '../../../global/utils/toast.util';
 
 export function useSecuritySettings() {
   const [biometricEnabled, setBiometricEnabled] = useState(false);

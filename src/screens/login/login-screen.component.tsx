@@ -10,7 +10,7 @@ import { Input } from '../../components/controls/input';
 import { ScreenContainer } from '../../components/layouts/screen-container';
 import { Typography } from '../../components/widgets/typography';
 import { FIREBASE_AUTH } from '../../Firebase/firebase-config';
-import { CustomSnackbar } from '../../global/utils/nitro-toast.util';
+import { CustomSnackbar } from '../../global/utils/toast.util';
 import { MotionView } from '../../motion';
 
 interface IProps {

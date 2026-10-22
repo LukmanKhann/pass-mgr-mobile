@@ -2,7 +2,7 @@ import { useCallback, useContext } from 'react';
 
 import { useTheme } from '../../../hooks/use-theme.hook';
 import { AuthContext } from '../../../Auth/AuthContext';
-import { CustomSnackbar } from '../../../global/utils/nitro-toast.util';
+import { CustomSnackbar } from '../../../global/utils/toast.util';
 import type { IThemeMode } from '../../../context/theme-context.component';
 
 export function useAppSettings() {

@@ -9,7 +9,7 @@ import { Button } from '../../components/controls/button';
 import { Input } from '../../components/controls/input';
 import { ScreenContainer } from '../../components/layouts/screen-container';
 import { Typography } from '../../components/widgets/typography';
-import { CustomSnackbar } from '../../global/utils/nitro-toast.util';
+import { CustomSnackbar } from '../../global/utils/toast.util';
 
 interface IProps {
   navigation: { navigate: (screen: string) => void };
@@ -48,7 +48,7 @@ export default function EditPasswordScreen({
       await editPassword(id, title, username, password, 'others');
       CustomSnackbar.success('Password updated successfully');
       navigation.navigate('Vault');
-    } catch (error) {
+    } catch {
       CustomSnackbar.error('Failed to update password');
     } finally {
       setLoading(false);
