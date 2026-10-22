@@ -12,6 +12,7 @@ import {
   PaperProvider,
   type MD3Theme,
 } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import AuthLockScreen from './src/components/Biometric/auth/auth-lock-screen.component';
 import BiometricAuthService from './src/components/Biometric/service/BiometricAuth';
@@ -21,7 +22,6 @@ import AppNavigator from './src/navigation/app-navigator.component';
 import { ThemeProvider } from './src/context/theme-context.component';
 import { useTheme } from './src/hooks/use-theme.hook';
 import { AuthProvider, AuthContext } from './src/Auth/AuthContext';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PasswordProvider } from './src/context/PasswordContext/password-context.component';
 import { ToastHost } from './src/global/utils/nitro-toast.util';
 import type { IColorTokens } from './src/theme/colors.theme';
@@ -127,7 +127,7 @@ function AppContent(): JSX.Element {
     return () => subscription.remove();
   }, []);
 
-  const handleForgotPin = async (): Promise<void> => {
+  const handleForgotPin = useCallback(async (): Promise<void> => {
     try {
       await BiometricAuthService.setNumericPassword('');
       await BiometricAuthService.setBiometricEnabled(false);
@@ -135,17 +135,17 @@ function AppContent(): JSX.Element {
     } finally {
       await signOut();
     }
-  };
+  }, [signOut]);
 
-  const handleBiometricAuthenticated = (): void => {
+  const handleBiometricAuthenticated = useCallback((): void => {
     setIsBiometricAuthenticated(true);
     setNeedsBiometricAuth(false);
-  };
+  }, []);
 
-  const handleBiometricSetupRequired = (): void => {
+  const handleBiometricSetupRequired = useCallback((): void => {
     setIsBiometricAuthenticated(true);
     setNeedsBiometricAuth(false);
-  };
+  }, []);
 
   if (loading || checkingBiometric || minimumLoading) {
     return <LoadingScreen />;
@@ -210,18 +210,18 @@ function ThemedPaperProvider({
 
 function App(): JSX.Element {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <PasswordProvider>
-          <BottomSheetModalProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <PasswordProvider>
             <ThemedPaperProvider>
               <ToastHost />
               <AppContent />
             </ThemedPaperProvider>
-          </BottomSheetModalProvider>
-        </PasswordProvider>
-      </AuthProvider>
-    </ThemeProvider>
+          </PasswordProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 

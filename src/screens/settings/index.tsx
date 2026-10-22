@@ -11,7 +11,7 @@ import { Typography } from '../../components/widgets/typography';
 import { useAppSettings } from './hooks/use-app-settings.hook';
 import { useSecuritySettings } from './hooks/use-security-settings.hook';
 import { AppearanceSection } from './components/appearance-section.component';
-import { AutoLockModal } from './components/auto-lock-modal.component';
+import { AutoLockSheet } from './components/auto-lock-sheet.component';
 import { DataSection } from './components/data-section.component';
 import { SecuritySection } from './components/security-section.component';
 import { SupportSection } from './components/support-section.component';
@@ -38,7 +38,7 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
   };
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [showAutoLockModal, setShowAutoLockModal] = useState(false);
+  const [showAutoLockSheet, setShowAutoLockSheet] = useState(false);
 
   const appSettings = useAppSettings();
   const securitySettings = useSecuritySettings();
@@ -66,7 +66,7 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
   const handleAutoLockSelect = async (minutes: number): Promise<void> => {
     const success = await securitySettings.handleAutoLockChange(minutes);
     if (success) {
-      setShowAutoLockModal(false);
+      setShowAutoLockSheet(false);
     }
   };
 
@@ -108,7 +108,7 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
         <SecuritySection
           securitySettings={securitySettings}
           passwordSettings={passwordUI}
-          onAutoLockPress={() => setShowAutoLockModal(true)}
+          onAutoLockPress={() => setShowAutoLockSheet(true)}
         />
         <AppearanceSection navigation={navigation} mode={appSettings.mode} />
         <DataSection
@@ -171,10 +171,10 @@ export default function SettingsScreen({ navigation }: Props): JSX.Element {
         }}
       />
 
-      <AutoLockModal
-        visible={showAutoLockModal}
+      <AutoLockSheet
+        visible={showAutoLockSheet}
         value={securitySettings.autoLockTimeout}
-        onClose={() => setShowAutoLockModal(false)}
+        onClose={() => setShowAutoLockSheet(false)}
         onSelect={minutes => {
           void handleAutoLockSelect(minutes);
         }}

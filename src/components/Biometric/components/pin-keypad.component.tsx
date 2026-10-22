@@ -27,15 +27,24 @@ export interface IPinKeypadProps {
   onDigitPress: (digit: string) => void;
   onBackspace: () => void;
   disabled?: boolean;
+  keyBackgroundColor?: string;
+  keyBorderColor?: string;
+  keyTextColor?: string;
 }
 
 export function PinKeypad({
   onDigitPress,
   onBackspace,
   disabled = false,
+  keyBackgroundColor,
+  keyBorderColor,
+  keyTextColor,
 }: IPinKeypadProps): JSX.Element {
   const { colors } = useTheme();
   const { width, height } = useWindowDimensions();
+  const resolvedKeyBackground = keyBackgroundColor ?? colors.surface;
+  const resolvedKeyBorder = keyBorderColor ?? colors.borderLight;
+  const resolvedKeyText = keyTextColor ?? colors.textPrimary;
 
   const maxKeySizeForHeight = Math.floor(
     (height * 0.4 - KEY_GAP * (KEYPAD_ROWS.length - 1)) / KEYPAD_ROWS.length,
@@ -69,7 +78,7 @@ export function PinKeypad({
           accessibilityRole="button"
           accessibilityLabel="Delete last digit"
         >
-          <MaterialSymbols name="delete" size={28} color={colors.textPrimary} />
+          <MaterialSymbols name="delete" size={28} color={resolvedKeyText} />
         </TouchableOpacity>
       );
     }
@@ -84,8 +93,8 @@ export function PinKeypad({
             width: keySize,
             height: keySize,
             borderRadius: keySize / 2,
-            backgroundColor: colors.surface,
-            borderColor: colors.borderLight,
+            backgroundColor: resolvedKeyBackground,
+            borderColor: resolvedKeyBorder,
           },
         ]}
         onPress={() => onDigitPress(key)}
@@ -94,7 +103,7 @@ export function PinKeypad({
         accessibilityRole="button"
         accessibilityLabel={`Digit ${key}`}
       >
-        <Typography variant="headingMd" color={colors.textPrimary}>
+        <Typography variant="headingMd" color={resolvedKeyText}>
           {key}
         </Typography>
       </TouchableOpacity>
