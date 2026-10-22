@@ -77,6 +77,8 @@ export default function EditPasswordScreen({
             label="Domain"
             placeholder="example.com"
             autoCapitalize="none"
+            autoCorrect={false}
+            spellCheck={false}
             value={title}
             onChangeText={setTitle}
           />
@@ -84,6 +86,8 @@ export default function EditPasswordScreen({
             label="Username"
             placeholder="jane@example.com"
             autoCapitalize="none"
+            autoCorrect={false}
+            spellCheck={false}
             value={username}
             onChangeText={setUsername}
           />

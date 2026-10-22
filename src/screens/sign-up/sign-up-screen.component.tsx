@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Keyboard,
   StyleSheet,
@@ -31,6 +31,49 @@ export default function SignUpScreen({ navigation }: IProps): JSX.Element {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const personIcon = useMemo(
+    () => (
+      <MaterialSymbols name="person" size={20} color={colors.textTertiary} />
+    ),
+    [colors.textTertiary],
+  );
+  const mailIcon = useMemo(
+    () => <MaterialSymbols name="mail" size={20} color={colors.textTertiary} />,
+    [colors.textTertiary],
+  );
+  const lockIcon = useMemo(
+    () => <MaterialSymbols name="lock" size={20} color={colors.textTertiary} />,
+    [colors.textTertiary],
+  );
+  const passwordVisibilityIcon = useMemo(
+    () => (
+      <MaterialSymbols
+        name={showPassword ? 'visibility_off' : 'visibility'}
+        size={20}
+        color={colors.textTertiary}
+      />
+    ),
+    [showPassword, colors.textTertiary],
+  );
+  const confirmVisibilityIcon = useMemo(
+    () => (
+      <MaterialSymbols
+        name={showConfirmPassword ? 'visibility_off' : 'visibility'}
+        size={20}
+        color={colors.textTertiary}
+      />
+    ),
+    [showConfirmPassword, colors.textTertiary],
+  );
+  const togglePassword = useCallback(
+    () => setShowPassword(previous => !previous),
+    [],
+  );
+  const toggleConfirmPassword = useCallback(
+    () => setShowConfirmPassword(previous => !previous),
+    [],
+  );
 
   const validateInputs = (): boolean => {
     if (!name.trim()) {
@@ -111,13 +154,7 @@ export default function SignUpScreen({ navigation }: IProps): JSX.Element {
               autoCapitalize="words"
               value={name}
               onChangeText={setName}
-              leftIcon={
-                <MaterialSymbols
-                  name="person"
-                  size={20}
-                  color={colors.textTertiary}
-                />
-              }
+              leftIcon={personIcon}
             />
             <Input
               label="Email address"
@@ -125,15 +162,11 @@ export default function SignUpScreen({ navigation }: IProps): JSX.Element {
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
+              autoCorrect={false}
+              spellCheck={false}
               value={email}
               onChangeText={setEmail}
-              leftIcon={
-                <MaterialSymbols
-                  name="mail"
-                  size={20}
-                  color={colors.textTertiary}
-                />
-              }
+              leftIcon={mailIcon}
             />
             <View style={[styles.field, { gap: spacing.xs }]}>
               <Input
@@ -143,21 +176,9 @@ export default function SignUpScreen({ navigation }: IProps): JSX.Element {
                 autoComplete="password-new"
                 value={password}
                 onChangeText={setPassword}
-                leftIcon={
-                  <MaterialSymbols
-                    name="lock"
-                    size={20}
-                    color={colors.textTertiary}
-                  />
-                }
-                rightIcon={
-                  <MaterialSymbols
-                    name={showPassword ? 'visibility_off' : 'visibility'}
-                    size={20}
-                    color={colors.textTertiary}
-                  />
-                }
-                onRightIconPress={() => setShowPassword(prev => !prev)}
+                leftIcon={lockIcon}
+                rightIcon={passwordVisibilityIcon}
+                onRightIconPress={togglePassword}
               />
               {password.length > 0 ? (
                 <Typography variant="caption" color={colors.textTertiary}>
@@ -172,21 +193,9 @@ export default function SignUpScreen({ navigation }: IProps): JSX.Element {
               autoComplete="password-new"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              leftIcon={
-                <MaterialSymbols
-                  name="lock"
-                  size={20}
-                  color={colors.textTertiary}
-                />
-              }
-              rightIcon={
-                <MaterialSymbols
-                  name={showConfirmPassword ? 'visibility_off' : 'visibility'}
-                  size={20}
-                  color={colors.textTertiary}
-                />
-              }
-              onRightIconPress={() => setShowConfirmPassword(prev => !prev)}
+              leftIcon={lockIcon}
+              rightIcon={confirmVisibilityIcon}
+              onRightIconPress={toggleConfirmPassword}
             />
             <Button
               title={loading ? 'Creating Account...' : 'Create Account'}

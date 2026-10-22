@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Keyboard,
   Modal,
   Platform,
   ScrollView,
@@ -86,7 +87,7 @@ export function EditPasswordModal({
       >
         <TouchableOpacity
           activeOpacity={1}
-          onPress={() => {}}
+          onPress={Keyboard.dismiss}
           style={[
             styles.container,
             {
@@ -113,6 +114,8 @@ export function EditPasswordModal({
               error={errors.title}
               placeholder="example.com"
               autoCapitalize="none"
+              autoCorrect={false}
+              spellCheck={false}
             />
             <Input
               label="Username"
@@ -121,6 +124,8 @@ export function EditPasswordModal({
               error={errors.username}
               placeholder="jane@example.com"
               autoCapitalize="none"
+              autoCorrect={false}
+              spellCheck={false}
             />
             <Input
               label="Password"

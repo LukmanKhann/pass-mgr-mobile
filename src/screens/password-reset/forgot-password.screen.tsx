@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -26,6 +26,7 @@ export default function ForgotPasswordScreen({
 }: Props): JSX.Element {
   const { colors, spacing } = useTheme();
   const [email, setEmail] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
   const [sending, setSending] = useState(false);
 
   const isValidEmail = useMemo(
@@ -33,10 +34,15 @@ export default function ForgotPasswordScreen({
     [email],
   );
 
+  const handleEmailBlur = useCallback(() => setEmailTouched(true), []);
+
   const emailError =
-    email.length > 0 && !isValidEmail
-      ? 'Enter a valid email address'
-      : undefined;
+    emailTouched && !isValidEmail ? 'Enter a valid email address' : undefined;
+
+  const mailIcon = useMemo(
+    () => <MaterialSymbols name="mail" size={20} color={colors.textTertiary} />,
+    [colors.textTertiary],
+  );
 
   const handleSend = async (): Promise<void> => {
     if (!isValidEmail) {
@@ -109,16 +115,13 @@ export default function ForgotPasswordScreen({
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
+            autoCorrect={false}
+            spellCheck={false}
             value={email}
             onChangeText={setEmail}
+            onBlur={handleEmailBlur}
             error={emailError}
-            leftIcon={
-              <MaterialSymbols
-                name="mail"
-                size={20}
-                color={colors.textTertiary}
-              />
-            }
+            leftIcon={mailIcon}
           />
           <Button
             title={sending ? 'Sending...' : 'Send Reset Link'}

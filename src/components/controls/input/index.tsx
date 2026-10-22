@@ -5,7 +5,7 @@ import { useTheme } from '../../../hooks/use-theme.hook';
 import { Typography } from '../../widgets/typography';
 import type { IInputProps } from './input.type';
 
-export function Input({
+export function InputBase({
   label,
   error,
   leftIcon,
@@ -30,19 +30,23 @@ export function Input({
           styles.inputContainer,
           {
             backgroundColor: colors.surface,
-            borderColor: error ? colors.error : isFocused ? colors.accent : colors.border,
+            borderColor: error
+              ? colors.error
+              : isFocused
+              ? colors.accent
+              : colors.border,
             borderRadius: br.md,
             paddingHorizontal: sp.lg,
           },
         ]}
       >
-        {leftIcon && <View style={{ marginRight: sp.sm, alignSelf: 'center' }}>{leftIcon}</View>}
+        {leftIcon && (
+          <View style={{ marginRight: sp.sm, alignSelf: 'center' }}>
+            {leftIcon}
+          </View>
+        )}
         <TextInput
-          style={[
-            styles.textInput,
-            { color: colors.textPrimary },
-            style,
-          ]}
+          style={[styles.textInput, { color: colors.textPrimary }, style]}
           keyboardAppearance={isDark ? 'dark' : 'light'}
           placeholderTextColor={colors.textTertiary}
           onFocus={() => setIsFocused(true)}
@@ -50,20 +54,30 @@ export function Input({
           {...props}
         />
         {rightIcon && (
-          <TouchableOpacity style={{ marginLeft: sp.sm, alignSelf: 'center' }} onPress={onRightIconPress} disabled={!onRightIconPress}>
+          <TouchableOpacity
+            style={{ marginLeft: sp.sm, alignSelf: 'center' }}
+            onPress={onRightIconPress}
+            disabled={!onRightIconPress}
+          >
             {rightIcon}
           </TouchableOpacity>
         )}
       </View>
       {error && (
-        <Typography variant="caption" color={colors.error}>{error}</Typography>
+        <Typography variant="caption" color={colors.error}>
+          {error}
+        </Typography>
       )}
       {helperText && !error && (
-        <Typography variant="caption" color={colors.textTertiary}>{helperText}</Typography>
+        <Typography variant="caption" color={colors.textTertiary}>
+          {helperText}
+        </Typography>
       )}
     </View>
   );
 }
+
+export const Input = React.memo(InputBase);
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -84,5 +98,4 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
     textAlignVertical: 'center',
   },
-
 });

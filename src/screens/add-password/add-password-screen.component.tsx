@@ -138,6 +138,8 @@ export default function AddPasswordScreen({ navigation }: IProps): JSX.Element {
               label="Domain"
               placeholder="example.com"
               autoCapitalize="none"
+              autoCorrect={false}
+              spellCheck={false}
               value={title}
               onChangeText={(value: string) => {
                 setTitle(value);
@@ -156,6 +158,8 @@ export default function AddPasswordScreen({ navigation }: IProps): JSX.Element {
               label="Username"
               placeholder="you@example.com"
               autoCapitalize="none"
+              autoCorrect={false}
+              spellCheck={false}
               value={username}
               onChangeText={(value: string) => {
                 setUsername(value);

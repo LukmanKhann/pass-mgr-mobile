@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -24,6 +24,29 @@ export default function LoginScreen({ navigation }: Props): JSX.Element {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const mailIcon = useMemo(
+    () => <MaterialSymbols name="mail" size={20} color={colors.textTertiary} />,
+    [colors.textTertiary],
+  );
+  const lockIcon = useMemo(
+    () => <MaterialSymbols name="lock" size={20} color={colors.textTertiary} />,
+    [colors.textTertiary],
+  );
+  const visibilityIcon = useMemo(
+    () => (
+      <MaterialSymbols
+        name={showPassword ? 'visibility_off' : 'visibility'}
+        size={20}
+        color={colors.textTertiary}
+      />
+    ),
+    [showPassword, colors.textTertiary],
+  );
+  const togglePassword = useCallback(
+    () => setShowPassword(previous => !previous),
+    [],
+  );
 
   const handleLogin = async (): Promise<void> => {
     if (!email || !password) {
@@ -83,15 +106,11 @@ export default function LoginScreen({ navigation }: Props): JSX.Element {
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
+            autoCorrect={false}
+            spellCheck={false}
             value={email}
             onChangeText={setEmail}
-            leftIcon={
-              <MaterialSymbols
-                name="mail"
-                size={20}
-                color={colors.textTertiary}
-              />
-            }
+            leftIcon={mailIcon}
           />
           <Input
             label="Password"
@@ -100,21 +119,9 @@ export default function LoginScreen({ navigation }: Props): JSX.Element {
             autoComplete="password"
             value={password}
             onChangeText={setPassword}
-            leftIcon={
-              <MaterialSymbols
-                name="lock"
-                size={20}
-                color={colors.textTertiary}
-              />
-            }
-            rightIcon={
-              <MaterialSymbols
-                name={showPassword ? 'visibility_off' : 'visibility'}
-                size={20}
-                color={colors.textTertiary}
-              />
-            }
-            onRightIconPress={() => setShowPassword(prev => !prev)}
+            leftIcon={lockIcon}
+            rightIcon={visibilityIcon}
+            onRightIconPress={togglePassword}
           />
           <Typography
             variant="bodyMd"
