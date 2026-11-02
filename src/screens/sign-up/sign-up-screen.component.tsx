@@ -17,31 +17,35 @@ import { ScrollContainer } from '../../components/layouts/scroll-container';
 import { Typography } from '../../components/widgets/typography';
 import { FIREBASE_AUTH } from '../../Firebase/firebase-config';
 import { CustomSnackbar } from '../../global/utils/toast.util';
+import { get } from 'firebase/database';
 
 interface IProps {
   navigation: { navigate: (screen: string) => void; goBack: () => void };
 }
 
-const isFirebaseError = (error: unknown): error is { code: string; message: string } => {
-  return typeof error === 'object' && error !== null && 'code' in error;
+const isFirebaseError = (error: unknown): error is { code: string } =>
+  typeof error === 'object' && error !== null && 'code' in error;
+
+const SIGN_UP_MESSAGES: Record<string, string> = {
+  'auth/email-already-in-use':
+    'This email is already in use. Please try logging in.',
+  'auth/invalid-email':
+    'The email address is not valid. Please check and try again.',
+  'auth/operation-not-allowed':
+    'Email/password accounts are not enabled. Please contact support.',
+  'auth/weak-password':
+    'The password is too weak. Please choose a stronger password.',
 };
 
-const SIGN_UP_SCREEN_NAME: Record<string, string> = {
-  'auth/email-already-in-use': 'An account with this email already exists. Try signing in instead.',
-  'auth/invalid-email': 'The email address is not valid. Please enter a valid email.',
-  'auth/operation-not-allowed': 'Email/password accounts are not enabled. Please contact support.',
-  'auth/weak-password': 'The password is too weak. Please choose a stronger password.',
-  'auth/network-request-failed': 'Network error. Please check your internet connection and try again.',
-};
-
-const getSignUpErrorMessage = (errorCode: unknown): string => {
-  if(!isFirebaseError(errorCode)) {
-    return 'Could not create account. Please try again later.';
+const getSignUpErrorMessage = (error: unknown): string => {
+  if (!isFirebaseError(error)) {
+    return 'could not create you account. Please try again later.';
   }
-  const message =  SIGN_UP_SCREEN_NAME[errorCode.code] || 'An unexpected error occurred. Please try again later.';
-  return typeof message === 'string' ? message : 'An unexpected error occurred. Please try again later.';
+  const message = SIGN_UP_MESSAGES[error.code];
+  return typeof message === 'string'
+    ? message
+    : 'could not create your account. Please try again later.';
 };
-
 
 export default function SignUpScreen({ navigation }: IProps): JSX.Element {
   const { colors, spacing } = useTheme();
