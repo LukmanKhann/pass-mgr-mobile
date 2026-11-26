@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
@@ -30,16 +30,19 @@ function capitalize(value: string): string {
   return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
 }
 
-export function PasswordItem({
+function PasswordItemComponent({
   item,
-  passwordVisible,
-  onTogglePasswordVisibility,
   onEdit,
   onDelete,
   onCopyUsername,
   onCopyPassword,
 }: IPasswordItemProps): JSX.Element {
   const { colors, isDark, borderRadius, spacing } = useTheme();
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const togglePasswordVisibility = useCallback(
+    () => setPasswordVisible(prevState => !prevState),
+    [],
+  );
   const domainColor = getDomainColor(item.title);
   const username = item.username || 'No username';
   const title = item.title || 'Untitled';
@@ -67,7 +70,7 @@ export function PasswordItem({
       <TouchableOpacity
         style={[styles.topRow, { gap: spacing.md, padding: spacing.md }]}
         activeOpacity={0.7}
-        onPress={() => onTogglePasswordVisibility(item.id)}
+        onPress={togglePasswordVisibility}
       >
         <View
           style={[
@@ -198,6 +201,8 @@ export function PasswordItem({
     </Animated.View>
   );
 }
+
+export const PasswordItem = React.memo(PasswordItemComponent);
 
 const styles = StyleSheet.create({
   card: {

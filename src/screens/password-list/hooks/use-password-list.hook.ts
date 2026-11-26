@@ -9,12 +9,11 @@ import { CustomSnackbar } from '../../../global/utils/toast.util';
 
 interface IPasswordListState {
   filteredPasswords: IPasswordItem[];
-  loading: boolean;
+  mutating: boolean;
   refreshing: boolean;
   searchQuery: string;
   modalVisible: boolean;
   modalPasswordVisible: boolean;
-  passwordVisible: Record<string, boolean>;
   editId: string;
   title: string;
   username: string;
@@ -26,7 +25,6 @@ interface IPasswordListState {
   onRefresh: () => Promise<void>;
   handleSearch: (query: string) => void;
   closeModal: () => void;
-  togglePasswordVisibility: (id: string) => void;
   copyUsername: (username: string) => void;
   copyPassword: (password: string) => void;
   setModalPasswordVisible: (value: boolean) => void;
@@ -43,14 +41,11 @@ export function usePasswordList(): IPasswordListState {
   const [password, setPassword] = useState('');
   const [category, setCategory] = useState('');
   const [modalPasswordVisible, setModalPasswordVisible] = useState(false);
-  const [passwordVisible, setPasswordVisible] = useState<
-    Record<string, boolean>
-  >({});
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredPasswords, setFilteredPasswords] =
     useState<IPasswordItem[]>(passwords);
-  const [loading, setLoading] = useState(false);
+  const [mutating, setMutating] = useState(false);
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -103,13 +98,13 @@ export function usePasswordList(): IPasswordListState {
             style: 'destructive',
             onPress: async () => {
               try {
-                setLoading(true);
+                setMutating(true);
                 await deletePassword(id);
                 showSnackbar('Password deleted successfully', 'success');
               } catch {
                 showSnackbar('Failed to delete password', 'error');
               } finally {
-                setLoading(false);
+                setMutating(false);
               }
             },
           },
@@ -123,7 +118,7 @@ export function usePasswordList(): IPasswordListState {
   const handleSaveChanges = useCallback(
     async (values: IPasswordItem) => {
       try {
-        setLoading(true);
+        setMutating(true);
         await editPassword(
           editId,
           values.title,
@@ -142,7 +137,7 @@ export function usePasswordList(): IPasswordListState {
       } catch {
         showSnackbar('Failed to update password', 'error');
       } finally {
-        setLoading(false);
+        setMutating(false);
       }
     },
     [editId, editPassword, showSnackbar],
@@ -183,13 +178,6 @@ export function usePasswordList(): IPasswordListState {
     [showSnackbar],
   );
 
-  const togglePasswordVisibility = useCallback((id: string) => {
-    setPasswordVisible(prevState => ({
-      ...prevState,
-      [id]: !prevState[id],
-    }));
-  }, []);
-
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
   }, []);
@@ -206,12 +194,11 @@ export function usePasswordList(): IPasswordListState {
 
   return {
     filteredPasswords,
-    loading,
+    mutating,
     refreshing,
     searchQuery,
     modalVisible,
     modalPasswordVisible,
-    passwordVisible,
     editId,
     title,
     username,
@@ -223,7 +210,6 @@ export function usePasswordList(): IPasswordListState {
     onRefresh,
     handleSearch,
     closeModal,
-    togglePasswordVisibility,
     copyUsername,
     copyPassword,
     setModalPasswordVisible,
