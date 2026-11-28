@@ -1,4 +1,4 @@
-import React, {createContext, useEffect, useState, useContext} from 'react';
+import React, {createContext, useEffect, useState, useContext, useRef} from 'react';
 import {
   get,
   onValue,
@@ -33,7 +33,6 @@ interface IPasswordContextValue {
   editPassword: (id: string, title: string, username: string, password: string, category?: string) => Promise<void>;
   deletePassword: (id: string) => Promise<void>;
   loadPasswords: () => Promise<void>;
-  setupRealtimeListener: () => (() => void) | undefined;
 }
 
 const PasswordContext = createContext<IPasswordContextValue>({
@@ -42,19 +41,39 @@ const PasswordContext = createContext<IPasswordContextValue>({
   editPassword: async () => {},
   deletePassword: async () => {},
   loadPasswords: async () => {},
-  setupRealtimeListener: () => undefined,
 });
 
 export const PasswordProvider = ({children}: {children: React.ReactNode}) => {
   const [passwords, setPasswords] = useState<IPasswordItemShape[]>([]);
   const {user} = useContext(AuthContext);
 
-  const getEncryptionKey = () => {
-    if (!user) return null;
-    return CryptoJS.SHA256(
-      user.uid + '6xDSGdNxFBP1ZMuuFdNQOFTrfVkmKF8i',
+  const userRef = useRef<typeof user>(user);
+  const encryptionKeyCache = useRef<{uid: string; key: string} | null>(null);
+
+  // const getEncryptionKey = () => {
+  //   if (!user) return null;
+  //   return CryptoJS.SHA256(
+  //     user.uid + '6xDSGdNxFBP1ZMuuFdNQOFTrfVkmKF8i',
+  //   ).toString();
+  // };
+
+  userRef.current = user;
+  if(!user){
+    encryptionKeyCache.current = null;
+  }
+
+  const getEncryptionKey = (): string | null => {
+    const currentUser = userRef.current;
+    if(!currentUser) return null;
+    if( encryptionKeyCache.current?.uid === currentUser.uid){
+      return encryptionKeyCache.current.key;
+    }
+    const key = CryptoJS.SHA256(
+      currentUser.uid + '6xDSGdNxFBP1ZMuuFdNQOFTrfVkmKF8i',
     ).toString();
-  };
+    encryptionKeyCache.current = {uid: currentUser.uid, key};
+    return key;
+  }
 
   const encryptData = (data: string): string => {
     const key = getEncryptionKey();
@@ -79,11 +98,34 @@ export const PasswordProvider = ({children}: {children: React.ReactNode}) => {
   const decryptPassword = (encryptedPassword: string): string => decryptData(encryptedPassword);
 
   useEffect(() => {
-    if (user) {
-      loadPasswords();
-    } else {
-      setPasswords([]);
+    if (!user) {
+      return;
     }
+    const listnerUid = user.uid;
+    const passwordsRef = ref(FIREBASE_REALTIME_DB, `passwords/${listnerUid}`);
+    const unsubscribe = onValue(passwordsRef, (snapshot: any) => {
+      if (userRef.current?.uid !== listnerUid) {
+        return;
+      }
+      if (snapshot.exists()) {
+        const passwordsData = snapshot.val();
+        const passwordsArray = Object.keys(passwordsData).map((key: string) => {
+          const passwordData = passwordsData[key];
+          return {
+            id: key,
+            title: passwordData.title,
+            username: decryptData(passwordData.username),
+            password: decryptData(passwordData.password),
+            createdAt: handleFirebaseTimestamp(passwordData.createdAt),
+            updatedAt: handleFirebaseTimestamp(passwordData.updatedAt),
+            category: passwordData.category || 'General',
+          };
+        });
+        setPasswords(passwordsArray);
+      }else{setPasswords([]);
+        setPasswords([]);
+      }
+    });return unsubscribe;
   }, [user]);
 
   const loadPasswords = async (): Promise<void> => {
@@ -201,33 +243,33 @@ export const PasswordProvider = ({children}: {children: React.ReactNode}) => {
     }
   };
 
-  const setupRealtimeListener = () => {
-    if (!user) return;
+  // const setupRealtimeListener = () => {
+  //   if (!user) return;
 
-    const passwordsRef = ref(FIREBASE_REALTIME_DB, `passwords/${user.uid}`);
-    const onDataChange = (snapshot: any) => {
-      if (snapshot.exists()) {
-        const passwordsData = snapshot.val();
-        const passwordsArray = Object.keys(passwordsData).map((key: string) => {
-          const passwordData = passwordsData[key];
-          return {
-            id: key,
-            title: passwordData.title,
-            username: decryptData(passwordData.username),
-            password: decryptData(passwordData.password),
-            createdAt: handleFirebaseTimestamp(passwordData.createdAt),
-            updatedAt: handleFirebaseTimestamp(passwordData.updatedAt),
-            category: passwordData.category || 'General',
-          };
-        });
-        setPasswords(passwordsArray);
-      } else {
-        setPasswords([]);
-      }
-    };
+  //   const passwordsRef = ref(FIREBASE_REALTIME_DB, `passwords/${user.uid}`);
+  //   const onDataChange = (snapshot: any) => {
+  //     if (snapshot.exists()) {
+  //       const passwordsData = snapshot.val();
+  //       const passwordsArray = Object.keys(passwordsData).map((key: string) => {
+  //         const passwordData = passwordsData[key];
+  //         return {
+  //           id: key,
+  //           title: passwordData.title,
+  //           username: decryptData(passwordData.username),
+  //           password: decryptData(passwordData.password),
+  //           createdAt: handleFirebaseTimestamp(passwordData.createdAt),
+  //           updatedAt: handleFirebaseTimestamp(passwordData.updatedAt),
+  //           category: passwordData.category || 'General',
+  //         };
+  //       });
+  //       setPasswords(passwordsArray);
+  //     } else {
+  //       setPasswords([]);
+  //     }
+  //   };
 
-    return onValue(passwordsRef, onDataChange);
-  };
+  //   return onValue(passwordsRef, onDataChange);
+  // };
 
   return (
     <PasswordContext.Provider
@@ -237,7 +279,6 @@ export const PasswordProvider = ({children}: {children: React.ReactNode}) => {
         editPassword,
         deletePassword,
         loadPasswords,
-        setupRealtimeListener,
       }}>
       {children}
     </PasswordContext.Provider>
